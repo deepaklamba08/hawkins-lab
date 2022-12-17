@@ -1,6 +1,7 @@
 /.idea/codeStyles/
-/.idea/hawkins_lab.iml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/vcs.xml
-/.idea/.gitignore
+*.iml
+*misc.xml
+*modules.xml
+*vcs.xml
+*.gitignore
+.idea

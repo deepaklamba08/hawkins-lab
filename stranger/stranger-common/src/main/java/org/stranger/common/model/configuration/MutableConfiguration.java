@@ -1,4 +1,4 @@
-package org.stranger.common.model;
+package org.stranger.common.model.configuration;
 
 /**
  * mutable configuration

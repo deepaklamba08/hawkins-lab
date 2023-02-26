@@ -1,4 +1,4 @@
-package org.stranger.common.model;
+package org.stranger.common.model.configuration;
 
 import java.util.List;
 import java.util.Map;

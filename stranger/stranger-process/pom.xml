@@ -11,5 +11,14 @@
 
     <artifactId>stranger-process</artifactId>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>org.stranger</groupId>
+            <artifactId>stranger-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
 
 </project>

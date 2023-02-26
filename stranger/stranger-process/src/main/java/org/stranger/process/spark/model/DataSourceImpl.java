@@ -1,4 +1,4 @@
-package org.stranger.common.model.pipeline.sp;
+package org.stranger.process.spark.model;
 
 import org.stranger.common.model.source.Source;
 

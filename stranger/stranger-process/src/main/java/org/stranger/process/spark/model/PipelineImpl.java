@@ -1,13 +1,14 @@
-package org.stranger.common.model.pipeline.sp;
+package org.stranger.process.spark.model;
 
 import org.stranger.common.model.pipeline.DataSink;
 import org.stranger.common.model.pipeline.DataSource;
+import org.stranger.common.model.pipeline.Pipeline;
 import org.stranger.common.model.pipeline.Transformation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PipelineImpl {
+public class PipelineImpl implements Pipeline {
 
     private final List<DataSource> dataSources;
 

@@ -51,6 +51,14 @@ public interface Configuration {
 
     public boolean isFloat();
 
+    public boolean getBoolean(String fieldName);
+
+    public boolean getBoolean(String fieldName, boolean defaultValue);
+
+    public boolean isBoolean(String fieldName);
+
+    public boolean isBoolean();
+
     public List<Configuration> getListValue(String fieldName);
 
     public boolean isArray(String fieldName);

@@ -7,9 +7,28 @@ public class SqlTransformation implements Transformation {
     private final String queryType;
     private final String value;
 
-    public SqlTransformation(int index, String queryType, String value) {
+    private final View view;
+
+    public SqlTransformation(int index, String queryType, String value, View view) {
         this.index = index;
         this.queryType = queryType;
         this.value = value;
+        this.view = view;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public String getQueryType() {
+        return queryType;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public View getView() {
+        return view;
     }
 }

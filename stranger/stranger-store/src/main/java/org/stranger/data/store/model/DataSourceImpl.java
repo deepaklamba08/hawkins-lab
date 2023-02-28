@@ -13,4 +13,16 @@ public class DataSourceImpl implements DataSource {
         this.view = view;
         this.source = source;
     }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public View getView() {
+        return view;
+    }
+
+    public Source getSource() {
+        return source;
+    }
 }

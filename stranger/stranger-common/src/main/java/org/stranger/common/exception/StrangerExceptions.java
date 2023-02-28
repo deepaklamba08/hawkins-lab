@@ -47,7 +47,20 @@ public class StrangerExceptions {
             super(cause);
         }
     }
+    public static class InvalidStateException extends StrangerException {
 
+        public InvalidStateException(String message) {
+            super(message);
+        }
+
+        public InvalidStateException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public InvalidStateException(Throwable cause) {
+            super(cause);
+        }
+    }
     public static class SystemFailureException extends StrangerException {
 
         public SystemFailureException(String message) {

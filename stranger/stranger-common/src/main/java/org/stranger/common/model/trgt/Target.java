@@ -1,10 +1,8 @@
-package org.stranger.common.trgt;
+package org.stranger.common.model.trgt;
 
 import org.stranger.common.model.Entity;
 import org.stranger.common.model.configuration.Configuration;
 import org.stranger.common.model.id.Id;
-import org.stranger.common.model.source.Source;
-import org.stranger.common.model.source.SourceDetail;
 import org.stranger.common.model.user.User;
 
 import java.util.Date;

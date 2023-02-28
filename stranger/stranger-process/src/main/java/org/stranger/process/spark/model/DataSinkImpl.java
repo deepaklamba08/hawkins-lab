@@ -1,6 +1,6 @@
 package org.stranger.process.spark.model;
 
-import org.stranger.common.trgt.Target;
+import org.stranger.common.model.trgt.Target;
 
 public class DataSinkImpl {
     private final int index;

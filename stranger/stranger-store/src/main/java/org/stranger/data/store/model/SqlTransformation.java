@@ -1,6 +1,6 @@
-package org.stranger.process.spark.model;
+package org.stranger.data.store.model;
 
-import org.stranger.common.model.pipeline.Transformation;
+import org.stranger.common.model.application.Transformation;
 
 public class SqlTransformation implements Transformation {
     private final int index;

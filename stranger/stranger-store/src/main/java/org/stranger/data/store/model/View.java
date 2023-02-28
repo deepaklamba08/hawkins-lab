@@ -1,4 +1,4 @@
-package org.stranger.process.spark.model;
+package org.stranger.data.store.model;
 
 public class View {
 

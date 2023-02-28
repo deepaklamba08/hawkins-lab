@@ -1,10 +1,9 @@
-package org.stranger.common.model;
+package org.stranger.common.model.application;
 
+import org.stranger.common.model.AppType;
+import org.stranger.common.model.Entity;
 import org.stranger.common.model.configuration.Configuration;
 import org.stranger.common.model.id.Id;
-import org.stranger.common.model.pipeline.DataSink;
-import org.stranger.common.model.pipeline.DataSource;
-import org.stranger.common.model.pipeline.Transformation;
 import org.stranger.common.model.user.User;
 
 import java.util.ArrayList;

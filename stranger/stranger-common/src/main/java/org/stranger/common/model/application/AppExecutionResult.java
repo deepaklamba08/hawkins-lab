@@ -1,11 +1,11 @@
-package org.stranger.common.model.pipeline;
+package org.stranger.common.model.application;
 
 import org.stranger.common.model.configuration.Configuration;
 import org.stranger.common.model.id.Id;
 
 import java.util.Date;
 
-public class PipelineExecutionResult {
+public class AppExecutionResult {
 
     public enum ExecutionStatus {
 
@@ -25,7 +25,7 @@ public class PipelineExecutionResult {
 
     private final Configuration metrics;
 
-    public PipelineExecutionResult(Id runId, String engine, String runBy, Date startDate, Date endDate, ExecutionStatus executionStatus, String executionMessage, Configuration metrics) {
+    public AppExecutionResult(Id runId, String engine, String runBy, Date startDate, Date endDate, ExecutionStatus executionStatus, String executionMessage, Configuration metrics) {
         this.runId = runId;
         this.engine = engine;
         this.runBy = runBy;

@@ -15,7 +15,7 @@
 
         <dependency>
             <groupId>org.stranger</groupId>
-            <artifactId>stranger-common</artifactId>
+            <artifactId>stranger-store</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

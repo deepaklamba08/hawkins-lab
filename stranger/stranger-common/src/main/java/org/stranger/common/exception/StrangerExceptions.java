@@ -32,4 +32,34 @@ public class StrangerExceptions {
             super(cause);
         }
     }
+
+    public static class ObjectNotFoundException extends StrangerException {
+
+        public ObjectNotFoundException(String message) {
+            super(message);
+        }
+
+        public ObjectNotFoundException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ObjectNotFoundException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class SystemFailureException extends StrangerException {
+
+        public SystemFailureException(String message) {
+            super(message);
+        }
+
+        public SystemFailureException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public SystemFailureException(Throwable cause) {
+            super(cause);
+        }
+    }
 }

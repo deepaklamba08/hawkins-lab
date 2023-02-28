@@ -9,4 +9,12 @@
     <artifactId>stranger-store</artifactId>
     <name>Archetype - stranger-store</name>
     <url>http://maven.apache.org</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.stranger</groupId>
+            <artifactId>stranger-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

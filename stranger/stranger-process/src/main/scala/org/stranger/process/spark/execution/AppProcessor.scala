@@ -1,7 +1,8 @@
 package org.stranger.process.spark.execution
 
+import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
-import org.stranger.common.model.application.Application
+import org.stranger.common.model.application.{Application, DataSink, DataSource, Transformation}
 import org.stranger.common.util.StrangerConstants
 import org.stranger.data.store.model.{DataSinkImpl, DataSourceImpl, SqlTransformation}
 import org.stranger.process.ExecutionResult
@@ -11,6 +12,7 @@ import org.stranger.process.spark.execution.tr.TransformationRunnerFactory
 import org.stranger.process.spark.execution.util.ProcessUtil
 
 import collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object AppProcessor {
 
@@ -20,19 +22,41 @@ object AppProcessor {
     logger.info("Executing : AppProcessor.process()")
 
     val appConfig = application.getConfiguration
+    logger.info("creating spark session ...")
     val sparkSession = ProcessUtil.createSparkSession(appConfig.getConfiguration(StrangerConstants.SPARK_CONFIG_FIELD))
 
+    Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
+      case Success(_) =>
+        Try(this.processTransformations(application.getTransformations.asScala, sparkSession)) match {
+          case Success(_) =>
+            Try(this.processSinks(application.getDataSinks.asScala, sparkSession)) match {
+              case Success(_) =>
+                logger.info("Exiting : AppProcessor.process()")
+                new ExecutionResult(ExecutionResult.ExecutionStatus.SUCCESS, StrangerConstants.APP_EXE_SUCCESS_MESSAGE, null)
+              case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_SINK_EXE_FAILED_MESSAGE, exception)
+            }
+          case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_TR_EXE_FAILED_MESSAGE, exception)
+        }
+      case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_DS_LOAD_FAILED_MESSAGE, exception)
+
+    }
+
+  }
+
+  private def processSources(sources: Seq[DataSource], sparkSession: SparkSession): Unit = {
     logger.debug("processing data sources ...")
-    application.getDataSources.asScala.foreach(dataSource => {
+    sources.foreach(dataSource => {
       val ds = dataSource.asInstanceOf[DataSourceImpl]
       logger.debug("processing source - {}", ds.getSource.getName)
       val dataBag = DataLoaderFactory.getDataLoader(ds.getSource, sparkSession).load(ds.getSource)
       ProcessUtil.processDataBag(dataBag, ds.getView)
     })
     logger.debug("data sources processed ...")
+  }
 
+  private def processTransformations(transformations: Seq[Transformation], sparkSession: SparkSession): Unit = {
     logger.debug("processing transformations ...")
-    application.getTransformations.asScala.foreach(transformation => {
+    transformations.foreach(transformation => {
       logger.debug("processing transformation - {}", transformation.getClass)
       val dataBag = TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession).run(transformation)
       transformation match {
@@ -40,14 +64,18 @@ object AppProcessor {
         case other => throw new IllegalStateException(s"transformation is unknown - ${other.getClass}")
       }
     })
+  }
 
+  private def processSinks(sinks: Seq[DataSink], sparkSession: SparkSession): Unit = {
     logger.debug("processing data sinks ...")
-    application.getDataSinks.asScala.foreach(dataSink => {
+    sinks.foreach(dataSink => {
       val ds = dataSink.asInstanceOf[DataSinkImpl]
       logger.debug("processing sink - {}", ds.getTarget.getName)
       DataSinkFactory.getDataSink(ds.getTarget).sink(ProcessUtil.executeSql(ds.getSql, sparkSession), ds.getTarget)
     })
+  }
 
-    new ExecutionResult(ExecutionResult.ExecutionStatus.SUCCESS, StrangerConstants.APP_EXE_SUCCESS_MESSAGE, null)
+  private def toExecutionResult(messagePrefix: String, exception: Throwable): ExecutionResult = {
+    new ExecutionResult(ExecutionResult.ExecutionStatus.FAILED, s"$messagePrefix, cause - ${exception.getMessage}", null)
   }
 }

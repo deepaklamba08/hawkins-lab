@@ -11,10 +11,11 @@ import org.stranger.process.spark.execution.sink.DataSinkFactory
 import org.stranger.process.spark.execution.tr.TransformationRunnerFactory
 import org.stranger.process.spark.execution.util.ProcessUtil
 
+import java.io.{PrintWriter, StringWriter}
 import collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-object AppProcessor {
+class AppProcessor private[execution](rc: RuntimeConfiguration) {
 
   val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -76,6 +77,30 @@ object AppProcessor {
   }
 
   private def toExecutionResult(messagePrefix: String, exception: Throwable): ExecutionResult = {
-    new ExecutionResult(ExecutionResult.ExecutionStatus.FAILED, s"$messagePrefix, cause - ${exception.getMessage}", null)
+    val writer = new StringWriter()
+    val printWriter = new PrintWriter(writer)
+    exception.printStackTrace(printWriter)
+    printWriter.flush()
+
+    var errorMessage = s"$messagePrefix, cause - ${writer.toString()}"
+    errorMessage = if (errorMessage.length > this.rc.getErrorMessageLength) {
+      s"${errorMessage.substring(0, this.rc.getErrorMessageLength - 3)}..]"
+    } else {
+      errorMessage
+    }
+
+    new ExecutionResult(ExecutionResult.ExecutionStatus.FAILED, errorMessage, null)
+  }
+}
+
+object AppProcessor {
+  def apply(executionProperties: Map[String, String]): AppProcessor = {
+    val rc: RuntimeConfiguration = RuntimeConfiguration(executionProperties)
+    new AppProcessor(rc)
+  }
+
+  def apply(executionProperties: java.util.Map[String, String]): AppProcessor = {
+    val rc: RuntimeConfiguration = RuntimeConfiguration(executionProperties.asScala.toMap)
+    new AppProcessor(rc)
   }
 }

@@ -14,6 +14,7 @@
         <module>stranger-process</module>
         <module>stranger-service</module>
         <module>stranger-store</module>
+        <module>stranger-app</module>
     </modules>
     <properties>
         <scala.version>2.12.0</scala.version>

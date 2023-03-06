@@ -6,3 +6,4 @@
 *.gitignore
 .idea
 target
+/stranger/stranger-app/dependency-reduced-pom.xml

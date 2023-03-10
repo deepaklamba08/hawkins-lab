@@ -1,6 +1,5 @@
 package org.stranger.process.spark.engine;
 
-import com.google.common.base.Functions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stranger.common.model.application.Application;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SparkApplicationRunner implements IApplicationRunner {
     private Logger logger;

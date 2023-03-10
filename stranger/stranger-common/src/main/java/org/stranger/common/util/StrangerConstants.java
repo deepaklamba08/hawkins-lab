@@ -11,5 +11,6 @@ public class StrangerConstants {
     public static final String APP_EXE_SINK_EXE_FAILED_MESSAGE = "sink execution failed.";
     public static final String SPARK_CONFIG_FIELD = "spark_config";
 
-
+    public static final String APP_PARAM_ID = "appId";
+    public static final String APP_PARAM_SUBMITTER = "submitter";
 }

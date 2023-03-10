@@ -33,7 +33,7 @@ object StrangerAppArguments {
 }
 
 object DiHelper {
-  def createOrchestrator: Orchestrator = {
+  def createOrchestrator(args: StrangerAppArguments): Orchestrator = {
     null
   }
 }

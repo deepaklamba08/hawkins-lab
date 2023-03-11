@@ -26,7 +26,7 @@ public class Orchestrator {
         this.applicationRunner = applicationRunner;
     }
 
-    public void executeApplication(Id applicationId, String submitter) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidStateException {
+    public void executeApplication(Id applicationId, String submitter) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidStateException, StrangerExceptions.InvalidConfigurationException {
         logger.info("Executing : Orchestrator.executeApplication(applicationId : {}, submitter: {})", applicationId, submitter);
         if (applicationId == null || submitter == null || submitter.isEmpty()) {
             logger.error("Invalid arguments, applicationId : {}, submitter : {}", applicationId, submitter);

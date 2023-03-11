@@ -16,6 +16,7 @@ public interface Configuration {
 
     public Configuration getConfiguration(String fieldName, Configuration defaultValue);
 
+    public boolean isNull();
     public boolean isNull(String fieldName);
 
     public boolean isPresent(String fieldName);
@@ -67,6 +68,10 @@ public interface Configuration {
     public boolean isArray();
 
     public <T> List<T> getListValue(String fieldName, Function<Configuration, T> converter);
+
+    public  List<Configuration> asList();
+
+    public <T> List<T> asList(Function<Configuration, T> converter);
 
     public <T> Map<String, T> getMapValues(String fieldName, Function<Configuration, T> converter);
 

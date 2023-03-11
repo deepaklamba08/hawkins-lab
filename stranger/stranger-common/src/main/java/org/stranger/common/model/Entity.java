@@ -81,6 +81,8 @@ public abstract class Entity {
         protected boolean isActive;
         protected Configuration configuration;
 
+        protected EntityBuilder(){}
+
         protected EntityBuilder(Id id, String name, String description, Date createDate, Date updateDate, User createdBy, User updatedBy, boolean isActive, Configuration configuration) {
             this.id = id;
             this.name = name;

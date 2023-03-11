@@ -50,6 +50,9 @@ public class Application extends Entity {
         private List<Transformation> transformations;
 
         private List<DataSink> dataSinks;
+        public ApplicationBuilder(){
+            super();
+        }
         protected ApplicationBuilder(Id id, String name, String description, Date createDate, Date updateDate, User createdBy, User updatedBy, boolean isActive, Configuration configuration) {
             super(id, name, description, createDate, updateDate, createdBy, updatedBy, isActive, configuration);
         }

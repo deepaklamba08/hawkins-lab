@@ -42,6 +42,11 @@ public class JsonConfiguration implements MutableConfiguration {
     }
 
     @Override
+    public boolean isNull() {
+        return this.dataNode == null || this.dataNode.isNull();
+    }
+
+    @Override
     public boolean isNull(String fieldName) {
         JsonNode dataNode = this.dataNode.get(fieldName);
         return dataNode == null || dataNode.isNull();
@@ -174,15 +179,17 @@ public class JsonConfiguration implements MutableConfiguration {
     @Override
     public <T> List<T> getListValue(String fieldName, Function<Configuration, T> converter) {
         JsonNode value = this.dataNode.get(fieldName);
-        if (value == null || value.isNull()) {
-            throw new IllegalStateException("data is null");
-        }
-        if (value.isArray()) {
-            throw new IllegalStateException("data not an array type");
-        }
-        List<T> elements = new ArrayList<>();
-        value.elements().forEachRemaining(element -> elements.add(converter.apply(new JsonConfiguration(element))));
-        return elements;
+        return this.getListValue(value, converter);
+    }
+
+    @Override
+    public List<Configuration> asList() {
+        return this.asList(Function.identity());
+    }
+
+    @Override
+    public <T> List<T> asList(Function<Configuration, T> converter) {
+        return this.getListValue(this.dataNode, converter);
     }
 
     @Override
@@ -347,5 +354,17 @@ public class JsonConfiguration implements MutableConfiguration {
             throw new IllegalStateException("data is not object type");
         }
         return (ObjectNode) this.dataNode;
+    }
+
+    private <T> List<T> getListValue(JsonNode value, Function<Configuration, T> converter) {
+        if (value == null || value.isNull()) {
+            throw new IllegalStateException("data is null");
+        }
+        if (value.isArray()) {
+            throw new IllegalStateException("data not an array type");
+        }
+        List<T> elements = new ArrayList<>();
+        value.elements().forEachRemaining(element -> elements.add(converter.apply(new JsonConfiguration(element))));
+        return elements;
     }
 }

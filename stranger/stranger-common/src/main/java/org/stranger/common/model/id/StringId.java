@@ -2,7 +2,7 @@ package org.stranger.common.model.id;
 
 import java.util.Objects;
 
-public class StringId implements Id{
+public class StringId implements Id {
     private final String value;
 
     public StringId(String value) {
@@ -11,7 +11,7 @@ public class StringId implements Id{
 
     @Override
     public String getValue() {
-        return  this.value;
+        return this.value;
     }
 
     @Override
@@ -25,5 +25,10 @@ public class StringId implements Id{
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return "StringId[ " + value + " ]";
     }
 }

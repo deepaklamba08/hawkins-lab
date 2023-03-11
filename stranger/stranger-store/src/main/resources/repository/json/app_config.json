@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "name": "sample application",
+    "description": "spark based etl application",
+    "createDate": 1678925923592,
+    "createdBy": "xyz",
+    "isActive": true,
+    "type": "Batch",
+    "configuration": {
+      "spark_config": {}
+    },
+    "sources": [
+      {
+        "id": "1",
+        "name": "sample source",
+        "description": "spark based etl application source",
+        "createDate": 1678925923592,
+        "createdBy": "xyz",
+        "isActive": true,
+        "type": "file",
+        "fileFormat": "csv",
+        "location": "",
+        "configuration": {},
+        "view": {
+          "name": "",
+          "isPersist": false
+        }
+      }
+    ],
+    "transformations": [
+      {
+        "type": "sql",
+        "queryType": "",
+        "value": "",
+        "view": {
+          "name": "",
+          "isPersist": false
+        }
+      }
+    ],
+    "sinks": [
+      {
+        "sql": "",
+        "id": "1",
+        "name": "sample sink",
+        "description": "spark based etl application sink",
+        "createDate": 1678925923592,
+        "createdBy": "xyz",
+        "isActive": true,
+        "type": "",
+        "configuration": {}
+      }
+    ]
+  }
+]

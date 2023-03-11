@@ -1,0 +1,20 @@
+ java -classpath /g/dev/hawkins_lab/stranger/stranger-app/target/stranger-app-1.0-SNAPSHOT.jar \
+ -DSTRANGER_APP_HOME_DIR=/g/dev/hawkins_lab/stranger/stranger-app/target/ \
+ -Dlog4j.configuration=file:/g/dev/hawkins_lab/stranger/stranger-app/src/main/resources/app/conf/log4j.xml \
+ org.stranger.app.StrangerApp  appId 1 submitter abc
+
+ java -classpath /g/dev/hawkins_lab/stranger/stranger-app/target/stranger-app-1.0-SNAPSHOT.jar \
+ -DSTRANGER_APP_HOME_DIR=/g/dev/hawkins_lab/stranger/stranger-app/target/ \
+ -Dlog4j.configurationFile=file:/g/dev/hawkins_lab/stranger/stranger-app/src/main/resources/app/conf/log4j.xml \
+ org.stranger.app.StrangerApp  appId 1 submitter abc
+
+  java -classpath /g/dev/hawkins_lab/stranger/stranger-app/target/stranger-app-1.0-SNAPSHOT.jar \
+  -DSTRANGER_APP_HOME_DIR=/g/dev/hawkins_lab/stranger/stranger-app/target/ \
+  -Dlog4j.configurationFile=file:/g/dev/hawkins_lab/stranger/stranger-app/src/main/resources/app/conf/log4j.xml \
+  org.stranger.app.StrangerApp  appId 1 submitter abc
+
+  java \
+  -DSTRANGER_APP_HOME_DIR=/g/dev/hawkins_lab/stranger/stranger-app/target/ \
+  -Dlog4j.configurationFile=file://g/dev/hawkins_lab/stranger/stranger-app/src/main/resources/app/conf/log4j.xml \
+  -jar /g/dev/hawkins_lab/stranger/stranger-app/target/stranger-app-1.0-SNAPSHOT.jar appId 1 submitter abc
+

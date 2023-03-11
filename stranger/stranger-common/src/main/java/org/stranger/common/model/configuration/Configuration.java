@@ -1,5 +1,6 @@
 package org.stranger.common.model.configuration;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -9,7 +10,7 @@ import java.util.function.Function;
  */
 public interface Configuration {
 
-    public Iterable<String> getFieldNames();
+    public Iterator<String> getFieldNames();
 
     public Configuration getConfiguration(String fieldName);
 
@@ -27,33 +28,33 @@ public interface Configuration {
 
     public boolean isString();
 
-    public int getInt(String fieldName);
+    public Integer getInt(String fieldName);
 
-    public int getInt(String fieldName, int defaultValue);
+    public Integer getInt(String fieldName, int defaultValue);
 
     public boolean isInt(String fieldName);
 
     public boolean isInt();
 
-    public long getLong(String fieldName);
+    public Long getLong(String fieldName);
 
-    public long getLong(String fieldName, long defaultValue);
+    public Long getLong(String fieldName, long defaultValue);
 
     public boolean isLong(String fieldName);
 
     public boolean isLong();
 
-    public float getFloat(String fieldName);
+    public Float getFloat(String fieldName);
 
-    public float getFloat(String fieldName, float defaultValue);
+    public Float getFloat(String fieldName, float defaultValue);
 
     public boolean isFloat(String fieldName);
 
     public boolean isFloat();
 
-    public boolean getBoolean(String fieldName);
+    public Boolean getBoolean(String fieldName);
 
-    public boolean getBoolean(String fieldName, boolean defaultValue);
+    public Boolean getBoolean(String fieldName, boolean defaultValue);
 
     public boolean isBoolean(String fieldName);
 

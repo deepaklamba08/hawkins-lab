@@ -41,7 +41,7 @@ public class Orchestrator {
             throw new StrangerExceptions.InvalidStateException("Application - " + application.getName() + " is inactive");
         }
 
-        Id executionId = this.executionResultRepository.storeResult(AppExecutionResult.AppExecutionStatus.RUNNING, StrangerConstants.APP_EXE_RUNNING_MESSAGE, submitter, new Date());
+        Id executionId = this.executionResultRepository.storeResult(application.getId(), AppExecutionResult.AppExecutionStatus.RUNNING, StrangerConstants.APP_EXE_RUNNING_MESSAGE, submitter, new Date());
         logger.debug("application execution created with id - {}", executionId);
 
         logger.debug("calling application runner ...");

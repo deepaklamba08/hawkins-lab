@@ -12,6 +12,10 @@ public class ConfigurationFactory {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    public static ObjectMapper getObjectMapper() {
+        return OBJECT_MAPPER;
+    }
+
     public static JsonConfiguration load(File source, String type) {
 
         if (StrangerConstants.REPO_TYPE_JSON.equalsIgnoreCase(type)) {

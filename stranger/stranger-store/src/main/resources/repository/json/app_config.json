@@ -12,6 +12,7 @@
     },
     "sources": [
       {
+        "index": 1,
         "id": "1",
         "name": "sample source",
         "description": "spark based etl application source",
@@ -30,6 +31,7 @@
     ],
     "transformations": [
       {
+        "index": 1,
         "type": "sql",
         "queryType": "",
         "value": "",
@@ -41,14 +43,18 @@
     ],
     "sinks": [
       {
+        "index": 1,
         "sql": "",
         "id": "1",
         "name": "sample sink",
         "description": "spark based etl application sink",
         "createDate": 1678925923592,
+        "fileFormat": "csv",
         "createdBy": "xyz",
+        "location": "",
+        "mode": "",
         "isActive": true,
-        "type": "",
+        "type": "file",
         "configuration": {}
       }
     ]

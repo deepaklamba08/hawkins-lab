@@ -95,55 +95,7 @@ public abstract class Entity {
             this.configuration = configuration;
         }
 
-        public EntityBuilder withName(String name) {
-            this.name = name;
-            return this;
-        }
 
-        public EntityBuilder withDescription(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public EntityBuilder withCreateDate(Date createDate) {
-            this.createDate = createDate;
-            return this;
-        }
-
-        public EntityBuilder withUpdateDate(Date updateDate) {
-            this.updateDate = updateDate;
-            return this;
-        }
-
-        public EntityBuilder withCreatedBy(User createdBy) {
-            this.createdBy = createdBy;
-            return this;
-        }
-
-        public EntityBuilder withUpdatedBy(User updatedBy) {
-            this.updatedBy = updatedBy;
-            return this;
-        }
-
-        public EntityBuilder withActive(boolean isActive) {
-            this.isActive = isActive;
-            return this;
-        }
-
-        public EntityBuilder makeActive() {
-            this.isActive = true;
-            return this;
-        }
-
-        public EntityBuilder makeInActive() {
-            this.isActive = false;
-            return this;
-        }
-
-        public EntityBuilder withConfiguration(Configuration configuration) {
-            this.configuration = configuration;
-            return this;
-        }
 
         public abstract Entity build();
     }

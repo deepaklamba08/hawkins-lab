@@ -53,6 +53,11 @@ public class JsonConfiguration implements MutableConfiguration {
     }
 
     @Override
+    public boolean hasField(String fieldName) {
+        return this.dataNode.has(fieldName);
+    }
+
+    @Override
     public boolean isPresent(String fieldName) {
         return this.dataNode.has(fieldName);
     }
@@ -155,6 +160,20 @@ public class JsonConfiguration implements MutableConfiguration {
     @Override
     public boolean isBoolean() {
         return this.dataNode.isBoolean();
+    }
+
+    @Override
+    public Date getDate(String fieldName) {
+        return new Date(this.getLong(fieldName));
+    }
+
+    @Override
+    public Date getDate(String fieldName, Date defaultValue) {
+        if (this.isNull(fieldName)) {
+            return defaultValue;
+        } else {
+            return new Date(this.getLong(fieldName));
+        }
     }
 
     @Override
@@ -360,7 +379,7 @@ public class JsonConfiguration implements MutableConfiguration {
         if (value == null || value.isNull()) {
             throw new IllegalStateException("data is null");
         }
-        if (value.isArray()) {
+        if (!value.isArray()) {
             throw new IllegalStateException("data not an array type");
         }
         List<T> elements = new ArrayList<>();

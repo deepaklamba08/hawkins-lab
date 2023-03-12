@@ -3,6 +3,7 @@ package org.stranger.common.model.configuration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.stranger.common.model.configuration.impl.JsonConfiguration;
+import org.stranger.common.util.StrangerConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class ConfigurationFactory {
 
     public static JsonConfiguration load(File source, String type) {
 
-        if ("json".equalsIgnoreCase(type)) {
+        if (StrangerConstants.REPO_TYPE_JSON.equalsIgnoreCase(type)) {
             try {
                 JsonNode config = OBJECT_MAPPER.readTree(source);
                 return new JsonConfiguration(config);

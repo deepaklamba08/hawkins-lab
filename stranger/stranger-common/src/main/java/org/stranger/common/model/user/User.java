@@ -7,6 +7,12 @@ public class User {
 
     private final Credential credential;
 
+    public User(String loginId) {
+        this.loginId = loginId;
+        this.name = null;
+        this.credential = null;
+    }
+
     public User(String name, String loginId, Credential credential) {
         this.name = name;
         this.loginId = loginId;

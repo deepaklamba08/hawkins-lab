@@ -1,5 +1,6 @@
 package org.stranger.common.model.configuration;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public interface Configuration {
 
     public boolean isNull();
     public boolean isNull(String fieldName);
+    public boolean hasField(String fieldName);
 
     public boolean isPresent(String fieldName);
 
@@ -61,6 +63,9 @@ public interface Configuration {
 
     public boolean isBoolean();
 
+    public Date getDate(String fieldName);
+
+    public Date getDate(String fieldName, Date defaultValue);
     public List<Configuration> getListValue(String fieldName);
 
     public boolean isArray(String fieldName);

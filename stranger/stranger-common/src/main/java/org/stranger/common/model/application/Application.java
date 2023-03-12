@@ -56,6 +56,60 @@ public class Application extends Entity {
         protected ApplicationBuilder(Id id, String name, String description, Date createDate, Date updateDate, User createdBy, User updatedBy, boolean isActive, Configuration configuration) {
             super(id, name, description, createDate, updateDate, createdBy, updatedBy, isActive, configuration);
         }
+
+        public ApplicationBuilder withId(Id id) {
+            this.id = id;
+            return this;
+        }
+        public ApplicationBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ApplicationBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public ApplicationBuilder withCreateDate(Date createDate) {
+            this.createDate = createDate;
+            return this;
+        }
+
+        public ApplicationBuilder withUpdateDate(Date updateDate) {
+            this.updateDate = updateDate;
+            return this;
+        }
+
+        public ApplicationBuilder withCreatedBy(User createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
+        public ApplicationBuilder withUpdatedBy(User updatedBy) {
+            this.updatedBy = updatedBy;
+            return this;
+        }
+
+        public ApplicationBuilder withActive(boolean isActive) {
+            this.isActive = isActive;
+            return this;
+        }
+
+        public ApplicationBuilder makeActive() {
+            this.isActive = true;
+            return this;
+        }
+
+        public ApplicationBuilder makeInActive() {
+            this.isActive = false;
+            return this;
+        }
+
+        public ApplicationBuilder withConfiguration(Configuration configuration) {
+            this.configuration = configuration;
+            return this;
+        }
         public ApplicationBuilder withAppType(AppType appType) {
             this.appType = appType;
             return this;

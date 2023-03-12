@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>stranger-process</artifactId>
+    <name>Archetype - stranger-app</name>
+    <url>http://maven.apache.org</url>
 
     <dependencies>
 

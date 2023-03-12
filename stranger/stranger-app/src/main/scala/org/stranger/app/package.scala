@@ -4,7 +4,10 @@ import scala.language.dynamics
 import org.stranger.process.{IApplicationRunner, Orchestrator}
 import org.stranger.common.model.id.{Id, StringId}
 import org.stranger.common.util.StrangerConstants
+import org.stranger.data.store.repo.impl.JsonApplicationRepository
 import org.stranger.data.store.repo.{ApplicationRepository, ExecutionResultRepository}
+
+import java.io.File
 
 case class StrangerAppArguments(arguments: Map[String, String]) extends Dynamic {
   require(arguments != null && !arguments.isEmpty,
@@ -18,6 +21,8 @@ case class StrangerAppArguments(arguments: Map[String, String]) extends Dynamic 
   }
 
   def submitter: String = this.arguments(StrangerConstants.APP_PARAM_SUBMITTER)
+
+  def getValue(key: String): String = this.arguments.get(key).fold(throw new IllegalStateException(s"key not found - $key"))(v => v)
 
 
 }
@@ -57,7 +62,7 @@ object DiHelper {
   }
 
   private def createApplicationRepository(arguments: StrangerAppArguments): ApplicationRepository = {
-    null
+    new JsonApplicationRepository(new File(arguments.getValue("appConfig")))
   }
 
   private def createExecutionResultRepository(arguments: StrangerAppArguments): ExecutionResultRepository = {

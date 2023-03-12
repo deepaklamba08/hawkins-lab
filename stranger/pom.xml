@@ -17,6 +17,8 @@
         <module>stranger-app</module>
     </modules>
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.tegret>1.8</maven.compiler.tegret>
         <scala.version>2.12.0</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
         <testng.version>6.11</testng.version>

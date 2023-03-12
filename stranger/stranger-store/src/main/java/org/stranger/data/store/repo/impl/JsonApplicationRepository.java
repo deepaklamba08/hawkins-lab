@@ -28,9 +28,12 @@ import org.stranger.data.store.repo.ApplicationRepository;
 import scala.App;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JsonApplicationRepository implements ApplicationRepository {
     private Logger logger;
@@ -79,7 +82,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
             this.applications.put(application.getId(), application);
         }
 
-        logger.info("no of applications loaded - {}",this.applications.size());
+        logger.info("no of applications loaded - {}", this.applications.size());
 
     }
 
@@ -87,6 +90,11 @@ public class JsonApplicationRepository implements ApplicationRepository {
         if (appConfig.isNull()) {
             throw new StrangerExceptions.InvalidConfigurationException("configuration is invalid");
         }
+        this.validateFields(appConfig, StrangerConstants.ID_FIELD, StrangerConstants.NAME_FIELD, StrangerConstants.DESCRIPTION_FIELD,
+                StrangerConstants.CREATE_DATE_FIELD, StrangerConstants.CREATED_BY_FIELD, StrangerConstants.TYPE_FIELD,
+                StrangerConstants.CONFIGURATION_FIELD, StrangerConstants.SOURCES_FIELD, StrangerConstants.TRANSFORMATIONS_FIELD,
+                StrangerConstants.SINKS_FIELD);
+
         Application.ApplicationBuilder appBuilder = new Application.ApplicationBuilder();
 
         appBuilder = appBuilder.withId(new StringId(appConfig.getString(StrangerConstants.ID_FIELD)))
@@ -96,16 +104,12 @@ public class JsonApplicationRepository implements ApplicationRepository {
                 .withUpdateDate(appConfig.getDate(StrangerConstants.UPDATE_DATE_FIELD, null))
                 .withCreatedBy(new User(appConfig.getString(StrangerConstants.CREATED_BY_FIELD)))
                 .withAppType(AppType.of(appConfig.getString(StrangerConstants.TYPE_FIELD)))
-                .withActive(appConfig.getBoolean(StrangerConstants.IS_ACTIVE_FIELD, false));
+                .withActive(appConfig.getBoolean(StrangerConstants.IS_ACTIVE_FIELD, false))
+                .withConfiguration(appConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD));
 
         if (appConfig.hasField(StrangerConstants.UPDATED_BY_FIELD)) {
-            appBuilder = appBuilder.withUpdatedBy(new User(appConfig.getString(StrangerConstants.UPDATED_BY_FIELD)));
+            appBuilder = appBuilder.withUpdatedBy(new User(appConfig.getString(StrangerConstants.UPDATED_BY_FIELD, null)));
         }
-
-        if (appConfig.hasField(StrangerConstants.CONFIGURATION_FIELD)) {
-            appBuilder = appBuilder.withConfiguration(appConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD));
-        }
-
         List<Configuration> sourcesConfig = appConfig.getListValue(StrangerConstants.SOURCES_FIELD);
         for (Configuration sourceConfig : sourcesConfig) {
             appBuilder.withDataSource(this.mapDataSource(sourceConfig));
@@ -125,6 +129,11 @@ public class JsonApplicationRepository implements ApplicationRepository {
     }
 
     private DataSink mapDataSink(Configuration sinkConfig) throws StrangerExceptions.InvalidConfigurationException {
+        this.validateFields(sinkConfig, StrangerConstants.ID_FIELD, StrangerConstants.NAME_FIELD, StrangerConstants.DESCRIPTION_FIELD,
+                StrangerConstants.CREATE_DATE_FIELD, StrangerConstants.CREATED_BY_FIELD, StrangerConstants.TYPE_FIELD,
+                StrangerConstants.INDEX_FIELD, StrangerConstants.SQL_FIELD);
+
+
         Target.TargetBuilder targetBuilder = new Target.TargetBuilder();
 
         targetBuilder = targetBuilder.withId(new StringId(sinkConfig.getString(StrangerConstants.ID_FIELD)))
@@ -145,6 +154,8 @@ public class JsonApplicationRepository implements ApplicationRepository {
 
         String sinkType = sinkConfig.getString(StrangerConstants.TYPE_FIELD);
         if (StrangerConstants.SINK_TYPE_FILE.equalsIgnoreCase(sinkType)) {
+            this.validateFields(sinkConfig, StrangerConstants.FILE_FORMAT_FIELD, StrangerConstants.MODE_FIELD,
+                    StrangerConstants.LOCATION_FIELD);
             FileTargetDetail fileTargetDetail = new FileTargetDetail(
                     FileFormat.of(sinkConfig.getString(StrangerConstants.FILE_FORMAT_FIELD)),
                     sinkConfig.getString(StrangerConstants.MODE_FIELD),
@@ -164,8 +175,11 @@ public class JsonApplicationRepository implements ApplicationRepository {
     }
 
     private Transformation mapTransformation(Configuration trConfig) throws StrangerExceptions.InvalidConfigurationException {
+        this.validateFields(trConfig, StrangerConstants.TYPE_FIELD);
         String trType = trConfig.getString(StrangerConstants.TYPE_FIELD);
         if (StrangerConstants.TRANSFORMATION_TYPE_FILE.equalsIgnoreCase(trType)) {
+            this.validateFields(trConfig, StrangerConstants.INDEX_FIELD, StrangerConstants.QUERY_TYPE_FIELD,
+                    StrangerConstants.VALUE_FIELD, StrangerConstants.VIEW_FIELD);
             SqlTransformation sqlTransformation = new SqlTransformation(trConfig.getInt(StrangerConstants.INDEX_FIELD),
                     trConfig.getString(StrangerConstants.QUERY_TYPE_FIELD),
                     trConfig.getString(StrangerConstants.VALUE_FIELD),
@@ -180,6 +194,9 @@ public class JsonApplicationRepository implements ApplicationRepository {
     }
 
     private DataSource mapDataSource(Configuration sourceConfig) throws StrangerExceptions.InvalidConfigurationException {
+        this.validateFields(sourceConfig, StrangerConstants.ID_FIELD, StrangerConstants.NAME_FIELD, StrangerConstants.DESCRIPTION_FIELD,
+                StrangerConstants.CREATE_DATE_FIELD, StrangerConstants.CREATED_BY_FIELD, StrangerConstants.TYPE_FIELD,
+                StrangerConstants.INDEX_FIELD, StrangerConstants.VIEW_FIELD);
 
         Source.SourceBuilder sourceBuilder = new Source.SourceBuilder();
         sourceBuilder = sourceBuilder.withId(new StringId(sourceConfig.getString(StrangerConstants.ID_FIELD)))
@@ -200,6 +217,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
 
         String sourceType = sourceConfig.getString(StrangerConstants.TYPE_FIELD);
         if (StrangerConstants.SOURCE_TYPE_FILE.equalsIgnoreCase(sourceType)) {
+            this.validateFields(sourceConfig, StrangerConstants.FILE_FORMAT_FIELD, StrangerConstants.LOCATION_FIELD);
             FileSource fileSource = new FileSource(
                     FileFormat.of(sourceConfig.getString(StrangerConstants.FILE_FORMAT_FIELD)),
                     sourceConfig.getString(StrangerConstants.LOCATION_FIELD),
@@ -221,5 +239,13 @@ public class JsonApplicationRepository implements ApplicationRepository {
         return new View(viewConfig.getString(StrangerConstants.NAME_FIELD), StrangerConstants.VIEW_TYPE_GLOBAL_TEMP,
                 viewConfig.getBoolean(StrangerConstants.IS_PERSIST_FIELD, false),
                 viewConfig.getString(StrangerConstants.PERSIST_MODE_FIELD, StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK));
+    }
+
+    private void validateFields(Configuration source, String... fields) throws StrangerExceptions.InvalidConfigurationException {
+        String missingFields = Stream.of(fields).filter(field -> !source.hasField(field) || source.isNull(field)).collect(Collectors.joining(", "));
+        if (!missingFields.isEmpty()) {
+            throw new StrangerExceptions.InvalidConfigurationException("required mandatory fields can not be null, fields - " + missingFields);
+        }
+
     }
 }

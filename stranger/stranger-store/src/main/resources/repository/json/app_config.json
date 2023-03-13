@@ -10,7 +10,9 @@
     "configuration": {
       "spark_config": {
         "master": "local[1]",
-        "other": {}
+        "other": {
+          "spark.testing.memory": "471859200"
+        }
       }
     },
     "sources": [

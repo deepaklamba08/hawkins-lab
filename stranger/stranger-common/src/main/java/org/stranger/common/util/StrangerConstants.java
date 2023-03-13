@@ -39,6 +39,10 @@ public class StrangerConstants {
     public static final String VIEW_FIELD="view";
     public static final String IS_PERSIST_FIELD="isPersist";
     public static final String PERSIST_MODE_FIELD=  "persistMode";
+    public static final String REPARTITION_FIELD=  "repartition";
+    public static final String RESTRUCTURE_ON_FIELD=  "restructureOn";
+    public static final String NUM_PARTITIONS_FIELD=  "numPartitions";
+    public static final String COLUMNS_FIELD=  "columns";
 
     public static final String PERSIST_MODE_MEMORY_AND_DISK=  "memory_and_disk";
     public static final String VIEW_TYPE_GLOBAL_TEMP="global_temp";

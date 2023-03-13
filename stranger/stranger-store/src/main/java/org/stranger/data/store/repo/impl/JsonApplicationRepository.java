@@ -24,9 +24,7 @@ import org.stranger.data.store.model.*;
 import org.stranger.data.store.repo.ApplicationRepository;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -224,9 +222,10 @@ public class JsonApplicationRepository implements ApplicationRepository {
         String sourceType = sourceConfig.getString(StrangerConstants.TYPE_FIELD);
         if (StrangerConstants.SOURCE_TYPE_FILE.equalsIgnoreCase(sourceType)) {
             this.validateFields(sourceConfig, StrangerConstants.FILE_FORMAT_FIELD, StrangerConstants.LOCATION_FIELD);
+
             FileSource fileSource = new FileSource(
                     FileFormat.of(sourceConfig.getString(StrangerConstants.FILE_FORMAT_FIELD)),
-                    sourceConfig.getString(StrangerConstants.LOCATION_FIELD),
+                    Collections.singletonList(sourceConfig.getString(StrangerConstants.LOCATION_FIELD)),
                     sourceConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null)
             );
             sourceBuilder = sourceBuilder.withSourceDetail(fileSource);
@@ -242,9 +241,17 @@ public class JsonApplicationRepository implements ApplicationRepository {
     }
 
     private View mapView(Configuration viewConfig) {
+        View.DataRestructure dataRestructure = null;
+        if (viewConfig.hasField(StrangerConstants.REPARTITION_FIELD)) {
+            dataRestructure = new View.DataRestructure(viewConfig.getString(StrangerConstants.RESTRUCTURE_ON_FIELD),
+                    viewConfig.getInt(StrangerConstants.NUM_PARTITIONS_FIELD, -1),
+                    Collections.singletonList(viewConfig.getString(StrangerConstants.COLUMNS_FIELD)));
+        }
+
         return new View(viewConfig.getString(StrangerConstants.NAME_FIELD), StrangerConstants.VIEW_TYPE_GLOBAL_TEMP,
                 viewConfig.getBoolean(StrangerConstants.IS_PERSIST_FIELD, false),
-                viewConfig.getString(StrangerConstants.PERSIST_MODE_FIELD, StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK));
+                viewConfig.getString(StrangerConstants.PERSIST_MODE_FIELD, StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK),
+                dataRestructure != null ? Optional.of(dataRestructure) : Optional.empty());
     }
 
     private void validateFields(Configuration source, String... fields) throws StrangerExceptions.InvalidConfigurationException {

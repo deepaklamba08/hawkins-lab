@@ -8,7 +8,7 @@ import org.stranger.common.model.source.SourceDetail
 import org.stranger.common.model.source.`type`.{FileFormat, FileSource}
 import org.stranger.process.spark.execution.loader.DataLoader
 import org.stranger.process.spark.execution.model.DataBag
-
+import collection.JavaConverters._
 class FileSourceDataLoader(sparkSession: SparkSession) extends DataLoader {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -28,7 +28,7 @@ class FileSourceDataLoader(sparkSession: SparkSession) extends DataLoader {
       case FileFormat.JSON => jsonReader(fileSource.getConfiguration) _
       case other => throw new InvalidConfigurationException(s"invalid file format - $other")
     }
-    val dataFrame = reader(Seq(fileSource.getLocation))
+    val dataFrame = reader(fileSource.getLocation.asScala)
     logger.info("Exiting : FileSourceDataLoader.load()")
     DataBag(dataFrame)
   }

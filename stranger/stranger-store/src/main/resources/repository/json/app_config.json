@@ -26,10 +26,10 @@
         "isActive": true,
         "type": "file",
         "fileFormat": "csv",
-        "location": "",
+        "location": "G:\\dev\\hawkins_lab\\stranger\\stranger-store\\src\\test\\resources\\test_data\\csv\\test_data.csv",
         "configuration": {},
         "view": {
-          "name": "",
+          "name": "data_table",
           "isPersist": false
         }
       }
@@ -38,8 +38,8 @@
       {
         "index": 1,
         "type": "sql",
-        "queryType": "",
-        "value": "",
+        "queryType": "sql",
+        "value": "select * from global_temp.data_table",
         "view": {
           "name": "",
           "isPersist": false
@@ -56,12 +56,12 @@
         "createDate": 1678925923592,
         "fileFormat": "csv",
         "createdBy": "xyz",
-        "location": "",
-        "mode": "",
+        "location": "G:\\dev\\hawkins_lab\\stranger\\stranger-app\\target\\app_1\\csv_op",
+        "mode": "overwrite",
         "isActive": true,
         "type": "file",
-        "queryType": "",
-        "value": "",
+        "queryType": "sql",
+        "value": "select * from global_temp.data_table",
         "configuration": {}
       }
     ]

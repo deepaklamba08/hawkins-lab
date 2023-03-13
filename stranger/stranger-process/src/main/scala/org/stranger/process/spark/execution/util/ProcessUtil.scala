@@ -10,6 +10,9 @@ import org.stranger.process.spark.execution.model.DataBag
 import java.io.File
 import scala.io.Source
 import collection.JavaConverters._
+import org.apache.spark.sql.functions
+import org.apache.spark.storage.StorageLevel
+import org.stranger.common.util.StrangerConstants
 
 object ProcessUtil {
 
@@ -22,7 +25,31 @@ object ProcessUtil {
       .config(this.createSparkConf(sparkConfiguration.getConfiguration("other"))).getOrCreate()
   }
 
-  def processDataBag(dataBag: DataBag, view: View): Unit = {}
+  def processDataBag(dataBag: DataBag, view: View): Unit = {
+
+    var dataframe = if (view.getDataRestructure.isPresent) {
+      val dataRestructure = view.getDataRestructure.get()
+      dataRestructure.getRestructureOn match {
+        case "column" => dataBag.dataFrame.repartition(dataRestructure.getColumns.asScala.map(functions.col): _*)
+        case "size" => dataBag.dataFrame.repartition(dataRestructure.getNumPartitions)
+        case "both" => dataBag.dataFrame.repartition(dataRestructure.getNumPartitions, dataRestructure.getColumns.asScala.map(functions.col): _*)
+        case other => throw new InvalidConfigurationException(s"invalid partition on - $other")
+      }
+    } else {
+      dataBag.dataFrame
+    }
+    dataframe = if (view.isPersist) {
+      view.getPersistMode match {
+        case StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK => dataframe.persist(StorageLevel.MEMORY_AND_DISK)
+        case other => throw new InvalidConfigurationException(s"invalid persist mode - $other")
+      }
+
+    } else {
+      dataframe
+    }
+
+    dataframe.createGlobalTempView(view.getName)
+  }
 
   def executeSql(queryType: String, value: String, sparkSession: SparkSession): DataBag = {
     val sqlQuery = queryType match {

@@ -18,3 +18,8 @@
   -Dlog4j.configurationFile=file://g/dev/hawkins_lab/stranger/stranger-app/src/main/resources/app/conf/log4j.xml \
   -jar /g/dev/hawkins_lab/stranger/stranger-app/target/stranger-app-1.0-SNAPSHOT.jar appId 1 submitter abc
 
+
+
+java -jar .\stranger-app\target\stranger-app-1.0-SNAPSHOT.jar appId 1 submitter java appConfig "G:\dev\hawkins_lab\stranger\str
+anger-store\src\main\resources\repository\json\app_config.json" executionResultDirectory "G:\dev\hawkins_lab\stranger\stranger-app\target\execution_result" run
+nerProperties "G:\dev\hawkins_lab\stranger\stranger-app\src\main\resources\app\conf\execution.properties"

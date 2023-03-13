@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stranger.common.exception.StrangerExceptions;
@@ -14,8 +13,8 @@ import org.stranger.common.model.configuration.ConfigurationFactory;
 import org.stranger.common.model.configuration.impl.JsonConfiguration;
 import org.stranger.common.model.id.Id;
 import org.stranger.common.model.id.StringId;
+import org.stranger.common.util.StrangerConstants;
 import org.stranger.data.store.repo.ExecutionResultRepository;
-import scala.reflect.internal.Trees;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,46 +41,94 @@ public class JsonExecutionResultRepository implements ExecutionResultRepository 
     }
 
     @Override
-    public Id storeResult(Id appId, AppExecutionResult.AppExecutionStatus executionStatus, String message, String runBy, Date startDate) {
+    public Id storeResult(Id appId, AppExecutionResult.AppExecutionStatus executionStatus, String message, String runBy, Date startDate) throws StrangerExceptions.SystemFailureException {
+        logger.info("Executing : JsonExecutionResultRepository.storeResult(appId : {},executionStatus : {}, message : {}, runBy : {}, startDate : {})", appId, executionStatus, message, runBy, startDate);
+        if (appId == null || executionStatus == null || message == null || message.isEmpty() || runBy == null || runBy.isEmpty() || startDate == null) {
+            logger.error("invalid arguments, appId : {},executionStatus : {}, message : {}, runBy : {}, startDate : {}", appId, executionStatus, message, runBy, startDate);
+            throw new IllegalArgumentException("invalid arguments, appId : " + appId + ",executionStatus : " + executionStatus + ", message : " + message + ", runBy : " + runBy + ", startDate : " + startDate);
+        }
+
         List<SummaryDTO> allResults = this.load();
-        String id = UUID.randomUUID().toString();
-        SummaryDTO summaryDTO = new SummaryDTO(id,appId.getValue(), "spark", runBy, startDate, executionStatus.name(), message);
+        Id id = this.randomId();
+        SummaryDTO summaryDTO = new SummaryDTO(id.getValue(), appId.getValue(), StrangerConstants.EXECUTION_ENGINE_SPARK, runBy, startDate, executionStatus.name(), message);
         allResults.add(summaryDTO);
         this.writeResult(allResults);
-        return new StringId(id);
+        logger.info("Exiting : JsonExecutionResultRepository.storeResult()");
+        return id;
     }
 
     @Override
-    public Id updateResult(Id executionId, AppExecutionResult.AppExecutionStatus executionStatus, String message, Date endDate, Configuration metrics) throws StrangerExceptions.ObjectNotFoundException {
-
+    public Id updateResult(Id executionId, AppExecutionResult.AppExecutionStatus executionStatus, String message, Date endDate, Configuration metrics) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.SystemFailureException {
+        logger.info("Executing : JsonExecutionResultRepository.updateResult(executionId : {},executionStatus : {}, message : {}, endDate : {}, metrics : {})", executionId, executionStatus, message, endDate, metrics);
+        if (executionId == null || executionStatus == null || message == null || message.isEmpty() || endDate == null) {
+            logger.error("invalid arguments, executionId : {},executionStatus : {}, message : {}, endDate : {}", executionId, executionStatus, message, endDate);
+            throw new IllegalArgumentException("invalid arguments, executionId : " + executionId + ",executionStatus : " + executionStatus + ", message : " + message + ", endDate : " + endDate);
+        }
         List<SummaryDTO> allResults = this.load();
-        SummaryDTO summary = this.lookupSummary(executionId);
+        Optional<SummaryDTO> summaryOption = allResults.stream().filter(dto -> dto.getRunId().equals(executionId.getValue())).findAny();
+        if (!summaryOption.isPresent()) {
+            logger.error("summary not found for id - {}", executionId);
+            throw new StrangerExceptions.ObjectNotFoundException("summary not found for id - " + executionId);
+        }
+        SummaryDTO summary = summaryOption.get();
         summary.setAppExecutionStatus(executionStatus.name());
         summary.setExecutionMessage(message);
         summary.setEndDate(endDate);
 
+        if (metrics != null) {
+            summary.setMetrics(this.parseMetrics(metrics));
+        }
         List<SummaryDTO> otherResults = allResults.stream().filter(dto -> !dto.getRunId().equals(executionId.getValue())).collect(Collectors.toList());
         otherResults.add(summary);
         this.writeResult(otherResults);
-        return null;
+        logger.info("Exiting : JsonExecutionResultRepository.updateResult()");
+        return executionId;
+    }
+
+    private Map<String, String> parseMetrics(Configuration metrics) {
+        if (!(metrics instanceof JsonConfiguration)) {
+            JsonConfiguration configuration = (JsonConfiguration) metrics;
+            return null;
+
+        } else {
+            throw new IllegalStateException("invalid metrics type");
+        }
     }
 
     @Override
-    public AppExecutionResult lookupResult(Id executionId) throws StrangerExceptions.ObjectNotFoundException {
+    public AppExecutionResult lookupResult(Id executionId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.SystemFailureException {
+        logger.info("Executing : JsonExecutionResultRepository.lookupResult(executionId : {})", executionId);
+        if (executionId == null) {
+            logger.error("invalid arguments, executionId can not be null");
+            throw new IllegalArgumentException("invalid arguments, executionId can not be null");
+        }
         SummaryDTO summary = this.lookupSummary(executionId);
+        logger.info("Exiting : JsonExecutionResultRepository.lookupResult()");
         return this.mapAppExecutionResult(summary);
     }
 
     @Override
-    public List<AppExecutionResult> lookupResults(Id applicationId) {
+    public List<AppExecutionResult> lookupResults(Id applicationId) throws StrangerExceptions.SystemFailureException {
+        logger.info("Executing : JsonExecutionResultRepository.lookupResults(applicationId : {})", applicationId);
+        if (applicationId == null) {
+            logger.error("invalid arguments, applicationId can not be null");
+            throw new IllegalArgumentException("invalid arguments, applicationId can not be null");
+        }
         List<SummaryDTO> allResults = this.load();
+        logger.info("Exiting : JsonExecutionResultRepository.lookupResults()");
         return allResults.stream().filter(dto -> dto.getAppId().equals(applicationId.getValue()))
                 .map(this::mapAppExecutionResult).collect(Collectors.toList());
     }
 
     @Override
-    public List<AppExecutionResult> lookupResults(Id applicationId, Set<AppExecutionResult.AppExecutionStatus> statuses) {
+    public List<AppExecutionResult> lookupResults(Id applicationId, Set<AppExecutionResult.AppExecutionStatus> statuses) throws StrangerExceptions.SystemFailureException {
+        logger.info("Executing : JsonExecutionResultRepository.lookupResults(applicationId : {}, statuses : {})", applicationId, statuses);
+        if (applicationId == null || statuses == null || statuses.isEmpty()) {
+            logger.error("invalid arguments, applicationId : {}, statuses : {}", applicationId, statuses);
+            throw new IllegalArgumentException("invalid arguments, applicationId : " + applicationId + ", statuses : " + statuses);
+        }
         List<SummaryDTO> allResults = this.load();
+        logger.info("Exiting : JsonExecutionResultRepository.lookupResults()");
         return allResults.stream().filter(dto -> dto.getAppId().equals(applicationId.getValue()) && compareStatuses(dto.getAppExecutionStatus(), statuses))
                 .map(this::mapAppExecutionResult).collect(Collectors.toList());
 
@@ -91,50 +138,79 @@ public class JsonExecutionResultRepository implements ExecutionResultRepository 
         return statuses.stream().filter(st -> st.name().equals(appExecutionStatus)).count() > 0;
     }
 
-    private List<SummaryDTO> load() {
-        JsonConfiguration summaryList = null;
+    private List<SummaryDTO> load() throws StrangerExceptions.SystemFailureException {
         if (!this.summaryDirectory.exists()) {
+            logger.info("creating directory - {}", this.summaryDirectory);
             this.summaryDirectory.mkdirs();
             this.summaryFile = new File(summaryDirectory, FILE_NAME);
-
+            BufferedWriter bufferedWriter = null;
             try {
                 this.summaryFile.createNewFile();
-
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.summaryFile));
+                bufferedWriter = new BufferedWriter(new FileWriter(this.summaryFile));
                 bufferedWriter.write("[]");
-                bufferedWriter.close();
+                return new ArrayList<>();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                logger.error("error occurred while creating file", e);
+                throw new StrangerExceptions.SystemFailureException("error occurred while creating file", e);
+            } finally {
+                if (bufferedWriter != null) {
+                    try {
+                        bufferedWriter.close();
+                    } catch (IOException e) {
+                        throw new StrangerExceptions.SystemFailureException("error occurred while closing file", e);
+                    }
+                }
             }
         } else {
             this.summaryFile = new File(summaryDirectory, FILE_NAME);
+            try {
+                return summaryReader.readValue(this.summaryFile);
+            } catch (IOException e) {
+                throw new StrangerExceptions.SystemFailureException("error occurred while reading file", e);
+            }
         }
-        try {
-            return summaryReader.readValue(this.summaryFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+    }
+
+    private Id randomId() {
+        return new StringId(UUID.randomUUID().toString());
     }
 
 
-    private void writeResult(List<SummaryDTO> allResults) {
+    private void writeResult(List<SummaryDTO> allResults) throws StrangerExceptions.SystemFailureException {
         try {
             this.summaryWriter.writeValue(this.summaryFile, allResults);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new StrangerExceptions.SystemFailureException("error occurred while writing file", e);
         }
     }
 
 
     private AppExecutionResult mapAppExecutionResult(SummaryDTO summary) {
-        return null;
+        AppExecutionResult.AppExecutionResultBuilder resultBuilder = new AppExecutionResult.AppExecutionResultBuilder()
+                .withAppId(new StringId(summary.getAppId()))
+                .withAppExecutionStatus(AppExecutionResult.AppExecutionStatus.getStatus(summary.appExecutionStatus))
+                .withRunBy(summary.getRunBy())
+                .withStartDate(summary.getStartDate())
+                .withEngine(summary.getEngine())
+                .withExecutionMessage(summary.getExecutionMessage())
+                .withEndDate(summary.getEndDate())
+                .withRunId(new StringId(summary.getRunId()));
+
+        if (summary.getMetrics() != null) {
+            JsonNode node = ConfigurationFactory.getObjectMapper().convertValue(summary.getMetrics(), JsonNode.class);
+            resultBuilder = resultBuilder.withMetrics(new JsonConfiguration(node));
+        }
+
+        return resultBuilder.build();
     }
 
 
-    private SummaryDTO lookupSummary(Id executionId) throws StrangerExceptions.ObjectNotFoundException {
+    private SummaryDTO lookupSummary(Id executionId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.SystemFailureException {
         List<SummaryDTO> allResults = this.load();
         Optional<SummaryDTO> summaryOption = allResults.stream().filter(dto -> dto.getRunId().equals(executionId.getValue())).findAny();
         if (!summaryOption.isPresent()) {
+            logger.error("summary not found for id - {}", executionId);
             throw new StrangerExceptions.ObjectNotFoundException("summary not found for id - " + executionId);
         }
         return summaryOption.get();
@@ -143,7 +219,6 @@ public class JsonExecutionResultRepository implements ExecutionResultRepository 
 
     private static class SummaryDTO {
         private String runId;
-
         private String appId;
         private String engine;
         private String runBy;

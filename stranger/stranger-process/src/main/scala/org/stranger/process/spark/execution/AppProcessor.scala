@@ -4,9 +4,9 @@ import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 import org.stranger.common.model.application.{Application, DataSink, DataSource, Transformation}
 import org.stranger.common.util.StrangerConstants
-import org.stranger.data.store.model.{DataSinkImpl, DataSourceImpl, SqlTransformation}
+import org.stranger.data.store.model.{DataSinkImpl, DataSourceImpl}
 import org.stranger.process.ExecutionResult
-import org.stranger.process.spark.execution.loader.{DataBag, DataLoaderFactory}
+import org.stranger.process.spark.execution.loader. DataLoaderFactory
 import org.stranger.process.spark.execution.sink.DataSinkFactory
 import org.stranger.process.spark.execution.tr.TransformationRunnerFactory
 import org.stranger.process.spark.execution.util.ProcessUtil
@@ -49,7 +49,7 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     sources.foreach(dataSource => {
       val ds = dataSource.asInstanceOf[DataSourceImpl]
       logger.debug("processing source - {}", ds.getSource.getName)
-      val dataBag = DataLoaderFactory.getDataLoader(ds.getSource, sparkSession).load(ds.getSource)
+      val dataBag = DataLoaderFactory.getDataLoader(ds.getSource, sparkSession).load(ds.getSource.getSourceDetail)
       ProcessUtil.processDataBag(dataBag, ds.getView)
     })
     logger.debug("data sources processed ...")
@@ -59,11 +59,8 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     logger.debug("processing transformations ...")
     transformations.foreach(transformation => {
       logger.debug("processing transformation - {}", transformation.getClass)
-      val dataBag = TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession).run(transformation)
-      transformation match {
-        case sq: SqlTransformation => ProcessUtil.processDataBag(dataBag, sq.getView)
-        case other => throw new IllegalStateException(s"transformation is unknown - ${other.getClass}")
-      }
+      val dataBag = TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession)
+        .runTransformation(transformation)
     })
   }
 
@@ -72,7 +69,7 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     sinks.foreach(dataSink => {
       val ds = dataSink.asInstanceOf[DataSinkImpl]
       logger.debug("processing sink - {}", ds.getTarget.getName)
-      DataSinkFactory.getDataSink(ds.getTarget).sink(ProcessUtil.executeSql(ds.getSql, sparkSession), ds.getTarget)
+      DataSinkFactory.getDataSink(ds.getTarget).sink(ProcessUtil.executeSql(ds.getQueryType, ds.getValue, sparkSession), ds.getTarget)
     })
   }
 

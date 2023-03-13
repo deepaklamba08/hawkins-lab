@@ -4,10 +4,14 @@ import scala.language.dynamics
 import org.stranger.process.{IApplicationRunner, Orchestrator}
 import org.stranger.common.model.id.{Id, StringId}
 import org.stranger.common.util.StrangerConstants
-import org.stranger.data.store.repo.impl.JsonApplicationRepository
+import org.stranger.data.store.repo.impl.{JsonApplicationRepository, JsonExecutionResultRepository}
 import org.stranger.data.store.repo.{ApplicationRepository, ExecutionResultRepository}
+import org.stranger.process.spark.engine.SparkApplicationRunner
 
 import java.io.File
+import java.util.Properties
+import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 case class StrangerAppArguments(arguments: Map[String, String]) extends Dynamic {
   require(arguments != null && !arguments.isEmpty,
@@ -66,10 +70,26 @@ object DiHelper {
   }
 
   private def createExecutionResultRepository(arguments: StrangerAppArguments): ExecutionResultRepository = {
-    null
+    new JsonExecutionResultRepository(new File(arguments.getValue("executionResultDirectory")))
   }
 
   private def createApplicationRunner(arguments: StrangerAppArguments): IApplicationRunner = {
-    null
+    val runnerProperties = new File(arguments.getValue("runnerProperties"))
+    val executionProperties = Try(Source.fromFile(runnerProperties)) match {
+      case Success(source) =>
+        Try(source.bufferedReader()) match {
+          case Success(reader) => val properties: Properties = new Properties()
+            properties.load(reader)
+            source.close()
+            reader.close()
+            properties
+          case Failure(exception) =>
+            throw new IllegalStateException(s"error occurred curred while reading file - $runnerProperties", exception)
+        }
+
+      case Failure(exception) =>
+        throw new IllegalStateException(s"error occurred while reading file - $runnerProperties", exception)
+    }
+    new SparkApplicationRunner(executionProperties)
   }
 }

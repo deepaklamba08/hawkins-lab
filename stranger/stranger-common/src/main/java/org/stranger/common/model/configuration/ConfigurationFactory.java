@@ -2,6 +2,7 @@ package org.stranger.common.model.configuration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.stranger.common.model.configuration.impl.JsonConfiguration;
 import org.stranger.common.util.StrangerConstants;
 
@@ -10,7 +11,7 @@ import java.io.IOException;
 
 public class ConfigurationFactory {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     public static ObjectMapper getObjectMapper() {
         return OBJECT_MAPPER;

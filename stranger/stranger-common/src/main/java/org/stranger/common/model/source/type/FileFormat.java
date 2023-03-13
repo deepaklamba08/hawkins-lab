@@ -2,7 +2,8 @@ package org.stranger.common.model.source.type;
 
 
 public enum FileFormat {
-    CSV;
+    CSV, PARQUET, ORC, AVRO;
+
     public static FileFormat of(String type) {
         if (CSV.name().equalsIgnoreCase(type)) {
             return FileFormat.CSV;

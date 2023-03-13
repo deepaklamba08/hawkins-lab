@@ -5,14 +5,15 @@ import org.stranger.common.model.trgt.Target;
 
 public class DataSinkImpl implements DataSink {
     private final int index;
-
-    private final String sql;
+    private final String queryType;
+    private final String value;
     private final Target target;
 
 
-    public DataSinkImpl(int index, String sql, Target target) {
+    public DataSinkImpl(int index, String queryType, String value, Target target) {
         this.index = index;
-        this.sql = sql;
+        this.queryType = queryType;
+        this.value = value;
         this.target = target;
     }
 
@@ -24,7 +25,11 @@ public class DataSinkImpl implements DataSink {
         return target;
     }
 
-    public String getSql() {
-        return sql;
+    public String getQueryType() {
+        return queryType;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

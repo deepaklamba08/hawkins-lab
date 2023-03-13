@@ -10,8 +10,16 @@ public class AppExecutionResult {
     public enum AppExecutionStatus {
         RUNNING, SUCCESS, FAILED;
 
-        public AppExecutionStatus getStatus(String status) {
-            return null;
+        public static AppExecutionStatus getStatus(String status) {
+            if (RUNNING.name().equalsIgnoreCase(status)) {
+                return RUNNING;
+            } else if (SUCCESS.name().equalsIgnoreCase(status)) {
+                return SUCCESS;
+            } else if (FAILED.name().equalsIgnoreCase(status)) {
+                return FAILED;
+            } else {
+                throw new IllegalStateException("invalid AppExecutionStatus - " + status);
+            }
         }
     }
 
@@ -100,7 +108,9 @@ public class AppExecutionResult {
         public AppExecutionResultBuilder withRunId(Id runId) {
             this.runId = runId;
             return this;
-        } public AppExecutionResultBuilder withAppId(Id appId) {
+        }
+
+        public AppExecutionResultBuilder withAppId(Id appId) {
             this.appId = appId;
             return this;
         }

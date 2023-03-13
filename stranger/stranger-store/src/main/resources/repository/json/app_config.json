@@ -55,6 +55,8 @@
         "mode": "",
         "isActive": true,
         "type": "file",
+        "queryType": "",
+        "value": "",
         "configuration": {}
       }
     ]

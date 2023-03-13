@@ -20,15 +20,10 @@ import org.stranger.common.model.trgt.Target;
 import org.stranger.common.model.trgt.type.FileTargetDetail;
 import org.stranger.common.model.user.User;
 import org.stranger.common.util.StrangerConstants;
-import org.stranger.data.store.model.DataSinkImpl;
-import org.stranger.data.store.model.DataSourceImpl;
-import org.stranger.data.store.model.SqlTransformation;
-import org.stranger.data.store.model.View;
+import org.stranger.data.store.model.*;
 import org.stranger.data.store.repo.ApplicationRepository;
-import scala.App;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +126,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
     private DataSink mapDataSink(Configuration sinkConfig) throws StrangerExceptions.InvalidConfigurationException {
         this.validateFields(sinkConfig, StrangerConstants.ID_FIELD, StrangerConstants.NAME_FIELD, StrangerConstants.DESCRIPTION_FIELD,
                 StrangerConstants.CREATE_DATE_FIELD, StrangerConstants.CREATED_BY_FIELD, StrangerConstants.TYPE_FIELD,
-                StrangerConstants.INDEX_FIELD, StrangerConstants.SQL_FIELD);
+                StrangerConstants.INDEX_FIELD, StrangerConstants.QUERY_TYPE_FIELD, StrangerConstants.VALUE_FIELD);
 
 
         Target.TargetBuilder targetBuilder = new Target.TargetBuilder();
@@ -169,7 +164,8 @@ public class JsonApplicationRepository implements ApplicationRepository {
         }
 
         DataSinkImpl dataSink = new DataSinkImpl(sinkConfig.getInt(StrangerConstants.INDEX_FIELD),
-                sinkConfig.getString(StrangerConstants.SQL_FIELD),
+                sinkConfig.getString(StrangerConstants.QUERY_TYPE_FIELD),
+                sinkConfig.getString(StrangerConstants.VALUE_FIELD),
                 targetBuilder.build());
         return dataSink;
     }
@@ -177,7 +173,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
     private Transformation mapTransformation(Configuration trConfig) throws StrangerExceptions.InvalidConfigurationException {
         this.validateFields(trConfig, StrangerConstants.TYPE_FIELD);
         String trType = trConfig.getString(StrangerConstants.TYPE_FIELD);
-        if (StrangerConstants.TRANSFORMATION_TYPE_FILE.equalsIgnoreCase(trType)) {
+        if (StrangerConstants.TRANSFORMATION_TYPE_SQL.equalsIgnoreCase(trType)) {
             this.validateFields(trConfig, StrangerConstants.INDEX_FIELD, StrangerConstants.QUERY_TYPE_FIELD,
                     StrangerConstants.VALUE_FIELD, StrangerConstants.VIEW_FIELD);
             SqlTransformation sqlTransformation = new SqlTransformation(trConfig.getInt(StrangerConstants.INDEX_FIELD),
@@ -188,6 +184,16 @@ public class JsonApplicationRepository implements ApplicationRepository {
             );
 
             return sqlTransformation;
+        } else if (StrangerConstants.TRANSFORMATION_TYPE_CUSTOM.equalsIgnoreCase(trType)) {
+            this.validateFields(trConfig, StrangerConstants.INDEX_FIELD, StrangerConstants.IMPLEMENTATION_FIELD,
+                    StrangerConstants.VIEW_FIELD);
+            CustomTransformation customTransformation = new CustomTransformation(trConfig.getInt(StrangerConstants.INDEX_FIELD),
+                    trConfig.getString(StrangerConstants.IMPLEMENTATION_FIELD),
+                    this.mapView(trConfig.getConfiguration(StrangerConstants.VIEW_FIELD)),
+                    trConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null)
+            );
+
+            return customTransformation;
         } else {
             throw new StrangerExceptions.InvalidConfigurationException("invalid transformation type - " + trType);
         }

@@ -10,6 +10,8 @@ public class StrangerConstants {
     public static final String APP_EXE_TR_EXE_FAILED_MESSAGE = "transformation execution failed.";
     public static final String APP_EXE_SINK_EXE_FAILED_MESSAGE = "sink execution failed.";
     public static final String SPARK_CONFIG_FIELD = "spark_config";
+
+    public static final String EXECUTION_ENGINE_SPARK =     "spark";
     
     public static final String REPO_TYPE_JSON = "json";
     public static final String APP_PARAM_ID = "appId";
@@ -43,7 +45,7 @@ public class StrangerConstants {
     public static final String QUERY_TYPE_FIELD="queryType";
     public static final String VALUE_FIELD="value";
     public static final String SINKS_FIELD="sinks";
-    public static final String SQL_FIELD="sql";
+    public static final String IMPLEMENTATION_FIELD = "implementation";
 
     /**
      * source types
@@ -57,6 +59,7 @@ public class StrangerConstants {
     /**
      * transformation types
      */
-    public static final String TRANSFORMATION_TYPE_FILE="sql";
+    public static final String TRANSFORMATION_TYPE_SQL ="sql";
+    public static final String TRANSFORMATION_TYPE_CUSTOM="custom";
 
 }

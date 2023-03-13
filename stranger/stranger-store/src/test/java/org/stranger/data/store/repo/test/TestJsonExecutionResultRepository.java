@@ -1,5 +1,6 @@
 package org.stranger.data.store.repo.test;
 
+import org.stranger.common.exception.StrangerExceptions;
 import org.stranger.common.model.application.AppExecutionResult;
 import org.stranger.common.model.id.StringId;
 import org.stranger.data.store.repo.impl.JsonExecutionResultRepository;
@@ -19,7 +20,7 @@ public class TestJsonExecutionResultRepository {
     }
 
     @Test
-    public void testSave() {
+    public void testSave() throws StrangerExceptions.SystemFailureException {
         this.executionResultRepository.storeResult(new StringId("1"), AppExecutionResult.AppExecutionStatus.RUNNING, "sunning", "xyz", new Date());
     }
 

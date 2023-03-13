@@ -13,9 +13,9 @@ class FileSourceDataLoader(sparkSession: SparkSession) extends DataLoader {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def load(source: SourceDetail): DataBag = {
+  override def load(sourceDetail: SourceDetail): DataBag = {
     logger.info("Executing : FileSourceDataLoader.load()")
-    val fileSource = source match {
+    val fileSource = sourceDetail match {
       case fs: FileSource => fs
       case other => throw new InvalidConfigurationException(s"invalid source type - $other")
     }
@@ -25,6 +25,7 @@ class FileSourceDataLoader(sparkSession: SparkSession) extends DataLoader {
       case FileFormat.PARQUET => parquetReader(fileSource.getConfiguration) _
       case FileFormat.ORC => orcReader(fileSource.getConfiguration) _
       case FileFormat.AVRO => avroReader(fileSource.getConfiguration) _
+      case FileFormat.JSON => jsonReader(fileSource.getConfiguration) _
       case other => throw new InvalidConfigurationException(s"invalid file format - $other")
     }
     val dataFrame = reader(Seq(fileSource.getLocation))
@@ -52,5 +53,10 @@ class FileSourceDataLoader(sparkSession: SparkSession) extends DataLoader {
   private def avroReader(config: Configuration)(location: Seq[String]): DataFrame = {
     logger.info("reading avro source ...")
     sparkSession.read.format("avro").load(location: _*)
+  }
+
+  private def jsonReader(config: Configuration)(location: Seq[String]): DataFrame = {
+    logger.info("reading json source ...")
+    sparkSession.read.format("json").load(location: _*)
   }
 }

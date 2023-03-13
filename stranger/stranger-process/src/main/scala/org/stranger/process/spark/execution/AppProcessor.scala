@@ -59,7 +59,7 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     logger.debug("processing transformations ...")
     transformations.foreach(transformation => {
       logger.debug("processing transformation - {}", transformation.getClass)
-      val dataBag = TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession)
+      TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession)
         .runTransformation(transformation)
     })
   }
@@ -69,7 +69,8 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     sinks.foreach(dataSink => {
       val ds = dataSink.asInstanceOf[DataSinkImpl]
       logger.debug("processing sink - {}", ds.getTarget.getName)
-      DataSinkFactory.getDataSink(ds.getTarget).sink(ProcessUtil.executeSql(ds.getQueryType, ds.getValue, sparkSession), ds.getTarget)
+      DataSinkFactory.getDataSink(ds.getTarget)
+        .sink(ProcessUtil.executeSql(ds.getQueryType, ds.getValue, sparkSession), ds.getTarget.getTargetDetail)
     })
   }
 

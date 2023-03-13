@@ -6,7 +6,7 @@ import org.stranger.common.model.application.{Application, DataSink, DataSource,
 import org.stranger.common.util.StrangerConstants
 import org.stranger.data.store.model.{DataSinkImpl, DataSourceImpl}
 import org.stranger.process.ExecutionResult
-import org.stranger.process.spark.execution.loader. DataLoaderFactory
+import org.stranger.process.spark.execution.loader.DataLoaderFactory
 import org.stranger.process.spark.execution.sink.DataSinkFactory
 import org.stranger.process.spark.execution.tr.TransformationRunnerFactory
 import org.stranger.process.spark.execution.util.ProcessUtil
@@ -24,8 +24,16 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
 
     val appConfig = application.getConfiguration
     logger.info("creating spark session ...")
-    val sparkSession = ProcessUtil.createSparkSession(appConfig.getConfiguration(StrangerConstants.SPARK_CONFIG_FIELD))
+    val result = Try(ProcessUtil.createSparkSession(application.getName, appConfig.getConfiguration(StrangerConstants.SPARK_CONFIG_FIELD))) match {
+      case Success(sparkSession) => this.process(application, sparkSession)
+      case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_SESSION_CREATION_FAILED_MESSAGE, exception)
+    }
+    logger.debug("app execution status - {}", result.getExecutionStatus)
+    logger.info("Exiting : AppProcessor.process()")
+    result
+  }
 
+  private def process(application: Application, sparkSession: SparkSession): ExecutionResult = {
     Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
       case Success(_) =>
         Try(this.processTransformations(application.getTransformations.asScala, sparkSession)) match {
@@ -41,7 +49,6 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
       case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_DS_LOAD_FAILED_MESSAGE, exception)
 
     }
-
   }
 
   private def processSources(sources: Seq[DataSource], sparkSession: SparkSession): Unit = {

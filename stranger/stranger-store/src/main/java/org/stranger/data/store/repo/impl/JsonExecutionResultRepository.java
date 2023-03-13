@@ -42,7 +42,7 @@ public class JsonExecutionResultRepository implements ExecutionResultRepository 
 
     @Override
     public Id storeResult(Id appId, AppExecutionResult.AppExecutionStatus executionStatus, String message, String runBy, Date startDate) throws StrangerExceptions.SystemFailureException {
-        logger.info("Executing : JsonExecutionResultRepository.storeResult(appId : {},executionStatus : {}, message : {}, runBy : {}, startDate : {})", appId, executionStatus, message, runBy, startDate);
+        logger.info("Executing : JsonExecutionResultRepository.storeResult(appId : {},executionStatus : {},runBy : {}, startDate : {})", appId, executionStatus, runBy, startDate);
         if (appId == null || executionStatus == null || message == null || message.isEmpty() || runBy == null || runBy.isEmpty() || startDate == null) {
             logger.error("invalid arguments, appId : {},executionStatus : {}, message : {}, runBy : {}, startDate : {}", appId, executionStatus, message, runBy, startDate);
             throw new IllegalArgumentException("invalid arguments, appId : " + appId + ",executionStatus : " + executionStatus + ", message : " + message + ", runBy : " + runBy + ", startDate : " + startDate);

@@ -8,7 +8,10 @@
     "isActive": true,
     "type": "Batch",
     "configuration": {
-      "spark_config": {}
+      "spark_config": {
+        "master": "local[1]",
+        "other": {}
+      }
     },
     "sources": [
       {

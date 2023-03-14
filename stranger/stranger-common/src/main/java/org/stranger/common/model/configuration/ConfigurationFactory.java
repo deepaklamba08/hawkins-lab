@@ -45,7 +45,7 @@ public class ConfigurationFactory {
         if (parameters.isPresent()) {
             String configStr = loadFile(source);
             try {
-                JsonNode config = OBJECT_MAPPER.readTree(resolve(configStr, configStr, parameters.get()));
+                JsonNode config = OBJECT_MAPPER.readTree(resolve(configStr, StrangerConstants.REPO_TYPE_JSON, parameters.get()));
                 return new JsonConfiguration(config);
             } catch (IOException e) {
                 throw new StrangerExceptions.SystemFailureException("error occurred while parsing file - " + source, e);

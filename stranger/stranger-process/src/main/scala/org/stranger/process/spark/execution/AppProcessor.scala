@@ -1,18 +1,21 @@
 package org.stranger.process.spark.execution
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, functions}
+import org.apache.spark.storage.StorageLevel
 import org.slf4j.LoggerFactory
+import org.stranger.common.exception.StrangerExceptions.InvalidConfigurationException
 import org.stranger.common.model.application.{Application, DataSink, DataSource, Transformation}
 import org.stranger.common.util.StrangerConstants
-import org.stranger.data.store.model.{DataSinkImpl, DataSourceImpl}
+import org.stranger.data.store.model.{BaseTransformation, DataSinkImpl, DataSourceImpl, View}
 import org.stranger.process.ExecutionResult
 import org.stranger.process.spark.execution.loader.DataLoaderFactory
+import org.stranger.process.spark.execution.model.DataBag
 import org.stranger.process.spark.execution.sink.DataSinkFactory
 import org.stranger.process.spark.execution.tr.TransformationRunnerFactory
 import org.stranger.process.spark.execution.util.ProcessUtil
 
 import java.io.{PrintWriter, StringWriter}
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 class AppProcessor private[execution](rc: RuntimeConfiguration) {
@@ -34,46 +37,48 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
   }
 
   private def process(application: Application, sparkSession: SparkSession): ExecutionResult = {
-    Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
+    val executionResult = Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
       case Success(_) =>
         Try(this.processTransformations(application.getTransformations.asScala, sparkSession)) match {
           case Success(_) =>
             Try(this.processSinks(application.getDataSinks.asScala, sparkSession)) match {
               case Success(_) =>
-                logger.info("Exiting : AppProcessor.process()")
                 new ExecutionResult(ExecutionResult.ExecutionStatus.SUCCESS, StrangerConstants.APP_EXE_SUCCESS_MESSAGE, null)
               case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_SINK_EXE_FAILED_MESSAGE, exception)
             }
           case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_TR_EXE_FAILED_MESSAGE, exception)
         }
       case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_DS_LOAD_FAILED_MESSAGE, exception)
-
     }
+    logger.info("execution result - {}", executionResult.getExecutionStatus)
+    logger.info("Exiting : AppProcessor.process()")
+    executionResult
   }
 
   private def processSources(sources: Seq[DataSource], sparkSession: SparkSession): Unit = {
     logger.debug("processing data sources ...")
-    sources.foreach(dataSource => {
+    sources.filter(_.asInstanceOf[DataSourceImpl].getSource.isActive).foreach(dataSource => {
       val ds = dataSource.asInstanceOf[DataSourceImpl]
       logger.debug("processing source - {}", ds.getSource.getName)
       val dataBag = DataLoaderFactory.getDataLoader(ds.getSource, sparkSession).load(ds.getSource.getSourceDetail)
-      ProcessUtil.processDataBag(dataBag, ds.getView)
+      this.processDataBag(dataBag, ds.getView)
     })
     logger.debug("data sources processed ...")
   }
 
   private def processTransformations(transformations: Seq[Transformation], sparkSession: SparkSession): Unit = {
     logger.debug("processing transformations ...")
-    transformations.foreach(transformation => {
+    transformations.filter(_.asInstanceOf[BaseTransformation].isActive).foreach(transformation => {
       logger.debug("processing transformation - {}", transformation.getClass)
-      TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession)
+      val dataBag = TransformationRunnerFactory.getTransformationRunner(transformation, sparkSession)
         .runTransformation(transformation)
+      this.processDataBag(dataBag, transformation.asInstanceOf[BaseTransformation].getView)
     })
   }
 
   private def processSinks(sinks: Seq[DataSink], sparkSession: SparkSession): Unit = {
     logger.debug("processing data sinks ...")
-    sinks.foreach(dataSink => {
+    sinks.filter(_.asInstanceOf[DataSinkImpl].getTarget.isActive).foreach(dataSink => {
       val ds = dataSink.asInstanceOf[DataSinkImpl]
       logger.debug("processing sink - {}", ds.getTarget.getName)
       DataSinkFactory.getDataSink(ds.getTarget)
@@ -95,6 +100,48 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
     }
 
     new ExecutionResult(ExecutionResult.ExecutionStatus.FAILED, errorMessage, null)
+  }
+
+  private def processDataBag(dataBag: DataBag, view: View): DataBag = {
+    logger.info("processing data bag ...")
+    var dataframe = if (view.getDataRestructure.isPresent) {
+      val dataRestructure = view.getDataRestructure.get()
+      logger.info("data restructure is enabled, mode - {}", dataRestructure.getRestructureOn)
+      dataRestructure.getRestructureOn match {
+        case StrangerConstants.REPARTITION_ON_COLUMN => dataBag.dataFrame
+          .repartition(dataRestructure.getColumns.asScala.map(functions.col): _*)
+        case StrangerConstants.REPARTITION_ON_SIZE => dataBag.dataFrame
+          .repartition(dataRestructure.getNumPartitions)
+        case StrangerConstants.REPARTITION_ON_BOTH => dataBag.dataFrame
+          .repartition(dataRestructure.getNumPartitions, dataRestructure.getColumns.asScala.map(functions.col): _*)
+        case other => throw new InvalidConfigurationException(s"invalid partition on - $other")
+      }
+    } else {
+      dataBag.dataFrame
+    }
+    dataframe = if (view.isPersist) {
+      logger.info("data persist is enabled, mode - {}", view.getPersistMode)
+      view.getPersistMode match {
+        case StrangerConstants.PERSIST_MODE_DISK_ONLY => dataframe.persist(StorageLevel.DISK_ONLY)
+        case StrangerConstants.PERSIST_MODE_DISK_ONLY_2 => dataframe.persist(StorageLevel.DISK_ONLY_2)
+        case StrangerConstants.PERSIST_MODE_MEMORY_ONLY => dataframe.persist(StorageLevel.MEMORY_ONLY)
+        case StrangerConstants.PERSIST_MODE_MEMORY_ONLY_2 => dataframe.persist(StorageLevel.MEMORY_ONLY_2)
+        case StrangerConstants.PERSIST_MODE_MEMORY_ONLY_SER => dataframe.persist(StorageLevel.MEMORY_ONLY_SER)
+        case StrangerConstants.PERSIST_MODE_MEMORY_ONLY_SER_2 => dataframe.persist(StorageLevel.MEMORY_ONLY_SER_2)
+        case StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK => dataframe.persist(StorageLevel.MEMORY_AND_DISK)
+        case StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK_2 => dataframe.persist(StorageLevel.MEMORY_AND_DISK_2)
+        case StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK_SER => dataframe.persist(StorageLevel.MEMORY_AND_DISK_SER)
+        case StrangerConstants.PERSIST_MODE_MEMORY_AND_DISK_SER_2 => dataframe.persist(StorageLevel.MEMORY_AND_DISK_SER_2)
+        case StrangerConstants.PERSIST_MODE_OFF_HEAP => dataframe.persist(StorageLevel.OFF_HEAP)
+        case other => throw new InvalidConfigurationException(s"invalid persist mode - $other")
+      }
+
+    } else {
+      dataframe
+    }
+    logger.info("creating view, name - {}", view.getName)
+    dataframe.createGlobalTempView(view.getName)
+    DataBag(dataframe, dataBag.metadata)
   }
 }
 

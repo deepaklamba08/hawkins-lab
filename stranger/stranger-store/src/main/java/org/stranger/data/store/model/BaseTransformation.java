@@ -1,17 +1,21 @@
 package org.stranger.data.store.model;
 
+import org.stranger.common.model.Entity;
 import org.stranger.common.model.application.Transformation;
 import org.stranger.common.model.configuration.Configuration;
+import org.stranger.common.model.id.Id;
+import org.stranger.common.model.user.User;
 
-public abstract class BaseTransformation implements Transformation {
+import java.util.Date;
+
+public abstract class BaseTransformation extends Entity implements Transformation {
     private final int index;
     private final View view;
-    private final Configuration configuration;
 
-    public BaseTransformation(int index, View view, Configuration configuration) {
+    public BaseTransformation(Id id, String name, String description, Date createDate, Date updateDate, User createdBy, User updatedBy, boolean isActive, Configuration configuration, int index, View view) {
+        super(id, name, description, createDate, updateDate, createdBy, updatedBy, isActive, configuration);
         this.index = index;
         this.view = view;
-        this.configuration = configuration;
     }
 
     public int getIndex() {
@@ -22,7 +26,5 @@ public abstract class BaseTransformation implements Transformation {
         return view;
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
+
 }

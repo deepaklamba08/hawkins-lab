@@ -36,12 +36,18 @@
     ],
     "transformations": [
       {
+        "id": "1",
+        "name": "sample transformation",
+        "description": "spark based etl application transformation",
+        "createDate": 1678925923592,
+        "createdBy": "xyz",
+        "isActive": true,
         "index": 1,
         "type": "sql",
         "queryType": "sql",
         "value": "select * from global_temp.data_table",
         "view": {
-          "name": "",
+          "name": "data_table_1",
           "isPersist": false
         }
       }
@@ -61,7 +67,7 @@
         "isActive": true,
         "type": "file",
         "queryType": "sql",
-        "value": "select * from global_temp.data_table",
+        "value": "select * from global_temp.data_table_1",
         "configuration": {}
       }
     ]

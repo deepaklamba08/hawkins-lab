@@ -169,26 +169,47 @@ public class JsonApplicationRepository implements ApplicationRepository {
     }
 
     private Transformation mapTransformation(Configuration trConfig) throws StrangerExceptions.InvalidConfigurationException {
-        this.validateFields(trConfig, StrangerConstants.TYPE_FIELD);
+        this.validateFields(trConfig, StrangerConstants.ID_FIELD, StrangerConstants.NAME_FIELD, StrangerConstants.DESCRIPTION_FIELD,
+                StrangerConstants.CREATE_DATE_FIELD, StrangerConstants.CREATED_BY_FIELD, StrangerConstants.TYPE_FIELD,
+                StrangerConstants.INDEX_FIELD, StrangerConstants.VIEW_FIELD);
+
         String trType = trConfig.getString(StrangerConstants.TYPE_FIELD);
         if (StrangerConstants.TRANSFORMATION_TYPE_SQL.equalsIgnoreCase(trType)) {
-            this.validateFields(trConfig, StrangerConstants.INDEX_FIELD, StrangerConstants.QUERY_TYPE_FIELD,
-                    StrangerConstants.VALUE_FIELD, StrangerConstants.VIEW_FIELD);
-            SqlTransformation sqlTransformation = new SqlTransformation(trConfig.getInt(StrangerConstants.INDEX_FIELD),
-                    trConfig.getString(StrangerConstants.QUERY_TYPE_FIELD),
-                    trConfig.getString(StrangerConstants.VALUE_FIELD),
+            this.validateFields(trConfig, StrangerConstants.QUERY_TYPE_FIELD, StrangerConstants.VALUE_FIELD);
+
+            SqlTransformation sqlTransformation = new SqlTransformation(
+                    new StringId(trConfig.getString(StrangerConstants.ID_FIELD)),
+                    trConfig.getString(StrangerConstants.NAME_FIELD),
+                    trConfig.getString(StrangerConstants.DESCRIPTION_FIELD),
+                    trConfig.getDate(StrangerConstants.CREATE_DATE_FIELD),
+                    trConfig.getDate(StrangerConstants.UPDATE_DATE_FIELD, null),
+                    new User(trConfig.getString(StrangerConstants.CREATED_BY_FIELD)),
+                    trConfig.hasField(StrangerConstants.UPDATED_BY_FIELD) ? new User(trConfig.getString(StrangerConstants.UPDATED_BY_FIELD)) : null,
+                    trConfig.getBoolean(StrangerConstants.IS_ACTIVE_FIELD, false),
+                    trConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null),
+                    trConfig.getInt(StrangerConstants.INDEX_FIELD),
                     this.mapView(trConfig.getConfiguration(StrangerConstants.VIEW_FIELD)),
-                    trConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null)
+                    trConfig.getString(StrangerConstants.QUERY_TYPE_FIELD),
+                    trConfig.getString(StrangerConstants.VALUE_FIELD)
             );
 
             return sqlTransformation;
         } else if (StrangerConstants.TRANSFORMATION_TYPE_CUSTOM.equalsIgnoreCase(trType)) {
             this.validateFields(trConfig, StrangerConstants.INDEX_FIELD, StrangerConstants.IMPLEMENTATION_FIELD,
                     StrangerConstants.VIEW_FIELD);
-            CustomTransformation customTransformation = new CustomTransformation(trConfig.getInt(StrangerConstants.INDEX_FIELD),
-                    trConfig.getString(StrangerConstants.IMPLEMENTATION_FIELD),
+            CustomTransformation customTransformation = new CustomTransformation(
+                    new StringId(trConfig.getString(StrangerConstants.ID_FIELD)),
+                    trConfig.getString(StrangerConstants.NAME_FIELD),
+                    trConfig.getString(StrangerConstants.DESCRIPTION_FIELD),
+                    trConfig.getDate(StrangerConstants.CREATE_DATE_FIELD),
+                    trConfig.getDate(StrangerConstants.UPDATE_DATE_FIELD, null),
+                    new User(trConfig.getString(StrangerConstants.CREATED_BY_FIELD)),
+                    trConfig.hasField(StrangerConstants.UPDATED_BY_FIELD) ? new User(trConfig.getString(StrangerConstants.UPDATED_BY_FIELD)) : null,
+                    trConfig.getBoolean(StrangerConstants.IS_ACTIVE_FIELD, false),
+                    trConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null),
+                    trConfig.getInt(StrangerConstants.INDEX_FIELD),
                     this.mapView(trConfig.getConfiguration(StrangerConstants.VIEW_FIELD)),
-                    trConfig.getConfiguration(StrangerConstants.CONFIGURATION_FIELD, null)
+                    trConfig.getString(StrangerConstants.IMPLEMENTATION_FIELD)
             );
 
             return customTransformation;

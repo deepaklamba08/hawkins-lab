@@ -1,6 +1,6 @@
 package org.stranger.process.spark.execution
 
-class RuntimeConfiguration private[execution](configMap: Map[String, String]) {
+/*class RuntimeConfiguration private[execution](configMap: Map[String, String]) {
 
 
   def getStringConfig(key: String): String = this.configMap.getOrElse(key, throw new IllegalStateException(s"config not present for key - $key"))
@@ -28,5 +28,5 @@ object RuntimeConfiguration {
     Map(ConfigConstants.ERROR_MSG_LEN -> "1023")
     Map.empty[String, String]
   }
-}
+}*/
 

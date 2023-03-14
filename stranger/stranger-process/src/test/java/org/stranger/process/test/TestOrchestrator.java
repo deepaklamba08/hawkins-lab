@@ -2,6 +2,7 @@ package org.stranger.process.test;
 
 import org.stranger.common.exception.StrangerExceptions;
 import org.stranger.common.model.id.StringId;
+import org.stranger.common.rc.RuntimeConfiguration;
 import org.stranger.data.store.repo.ApplicationRepository;
 import org.stranger.data.store.repo.ExecutionResultRepository;
 import org.stranger.data.store.repo.impl.JsonApplicationRepository;
@@ -21,12 +22,11 @@ public class TestOrchestrator {
 
     @BeforeSuite
     public void init() {
-        URL res = this.getClass().getClassLoader().getResource("stranger/stranger-store/src/main/resources/repository/json/app_config.json");
         ApplicationRepository applicationRepository = new JsonApplicationRepository(new File(""));
         ExecutionResultRepository executionResultRepository = null;
 
-        Properties executionProperties = null;
-        IApplicationRunner applicationRunner = new SparkApplicationRunner(executionProperties);
+        RuntimeConfiguration runtimeConfiguration=null;
+        IApplicationRunner applicationRunner = new SparkApplicationRunner(runtimeConfiguration);
         this.orchestrator = new Orchestrator(applicationRepository, executionResultRepository, applicationRunner);
     }
     

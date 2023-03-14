@@ -3,6 +3,7 @@ package org.stranger
 import scala.language.dynamics
 import org.stranger.process.{IApplicationRunner, Orchestrator}
 import org.stranger.common.model.id.{Id, StringId}
+import org.stranger.common.rc.RuntimeConfiguration
 import org.stranger.common.util.StrangerConstants
 import org.stranger.data.store.repo.impl.{JsonApplicationRepository, JsonExecutionResultRepository}
 import org.stranger.data.store.repo.{ApplicationRepository, ExecutionResultRepository}
@@ -12,6 +13,7 @@ import java.io.File
 import java.util.Properties
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
+import scala.collection.JavaConverters._
 
 case class StrangerAppArguments(arguments: Map[String, String]) extends Dynamic {
   require(arguments != null && !arguments.isEmpty,
@@ -60,7 +62,9 @@ object DiHelper {
   def createOrchestrator(arguments: StrangerAppArguments): Orchestrator = {
     val applicationRepository: ApplicationRepository = this.createApplicationRepository(arguments)
     val executionResultRepository: ExecutionResultRepository = this.createExecutionResultRepository(arguments)
-    val applicationRunner: IApplicationRunner = this.createApplicationRunner(arguments)
+
+    val runtimeConfiguration = this.createRuntimeConfiguration(arguments)
+    val applicationRunner: IApplicationRunner = this.createApplicationRunner(runtimeConfiguration)
 
     new Orchestrator(applicationRepository, executionResultRepository, applicationRunner)
   }
@@ -73,7 +77,7 @@ object DiHelper {
     new JsonExecutionResultRepository(new File(arguments.getValue("executionResultDirectory")))
   }
 
-  private def createApplicationRunner(arguments: StrangerAppArguments): IApplicationRunner = {
+  private def createRuntimeConfiguration(arguments: StrangerAppArguments): RuntimeConfiguration = {
     val runnerProperties = new File(arguments.getValue("runnerProperties"))
     val executionProperties = Try(Source.fromFile(runnerProperties)) match {
       case Success(source) =>
@@ -90,6 +94,12 @@ object DiHelper {
       case Failure(exception) =>
         throw new IllegalStateException(s"error occurred while reading file - $runnerProperties", exception)
     }
-    new SparkApplicationRunner(executionProperties)
+
+    val configMap = executionProperties.stringPropertyNames().asScala.map(key => (key, executionProperties.getProperty(key))).toMap
+    RuntimeConfiguration(arguments.arguments, configMap)
+  }
+
+  private def createApplicationRunner(runtimeConfiguration: RuntimeConfiguration): IApplicationRunner = {
+    new SparkApplicationRunner(runtimeConfiguration)
   }
 }

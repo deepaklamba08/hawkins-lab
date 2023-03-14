@@ -5,6 +5,7 @@ import org.apache.spark.storage.StorageLevel
 import org.slf4j.LoggerFactory
 import org.stranger.common.exception.StrangerExceptions.InvalidConfigurationException
 import org.stranger.common.model.application.{Application, DataSink, DataSource, Transformation}
+import org.stranger.common.rc.RuntimeConfiguration
 import org.stranger.common.util.StrangerConstants
 import org.stranger.data.store.model.{BaseTransformation, DataSinkImpl, DataSourceImpl, View}
 import org.stranger.process.ExecutionResult
@@ -146,13 +147,8 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
 }
 
 object AppProcessor {
-  def apply(executionProperties: Map[String, String]): AppProcessor = {
-    val rc: RuntimeConfiguration = RuntimeConfiguration(executionProperties)
-    new AppProcessor(rc)
+  def apply(runtimeConfiguration: RuntimeConfiguration): AppProcessor = {
+    new AppProcessor(runtimeConfiguration)
   }
 
-  def apply(executionProperties: java.util.Map[String, String]): AppProcessor = {
-    val rc: RuntimeConfiguration = RuntimeConfiguration(executionProperties.asScala.toMap)
-    new AppProcessor(rc)
-  }
 }

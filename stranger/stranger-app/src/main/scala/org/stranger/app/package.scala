@@ -60,21 +60,21 @@ object StrangerAppArguments {
 
 object DiHelper {
   def createOrchestrator(arguments: StrangerAppArguments): Orchestrator = {
-    val applicationRepository: ApplicationRepository = this.createApplicationRepository(arguments)
-    val executionResultRepository: ExecutionResultRepository = this.createExecutionResultRepository(arguments)
-
     val runtimeConfiguration = this.createRuntimeConfiguration(arguments)
+    val applicationRepository: ApplicationRepository = this.createApplicationRepository(runtimeConfiguration)
+    val executionResultRepository: ExecutionResultRepository = this.createExecutionResultRepository(runtimeConfiguration)
     val applicationRunner: IApplicationRunner = this.createApplicationRunner(runtimeConfiguration)
 
     new Orchestrator(applicationRepository, executionResultRepository, applicationRunner)
   }
 
-  private def createApplicationRepository(arguments: StrangerAppArguments): ApplicationRepository = {
-    new JsonApplicationRepository(new File(arguments.getValue("appConfig")))
+  private def createApplicationRepository(runtimeConfiguration: RuntimeConfiguration): ApplicationRepository = {
+    new JsonApplicationRepository(new File(runtimeConfiguration.getStringConfig("appConfig")),
+      java.util.Optional.of(runtimeConfiguration.getAll()))
   }
 
-  private def createExecutionResultRepository(arguments: StrangerAppArguments): ExecutionResultRepository = {
-    new JsonExecutionResultRepository(new File(arguments.getValue("executionResultDirectory")))
+  private def createExecutionResultRepository(runtimeConfiguration: RuntimeConfiguration): ExecutionResultRepository = {
+    new JsonExecutionResultRepository(new File(runtimeConfiguration.getStringConfig("executionResultDirectory")))
   }
 
   private def createRuntimeConfiguration(arguments: StrangerAppArguments): RuntimeConfiguration = {

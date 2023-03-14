@@ -22,7 +22,7 @@ public class TestJsonApplicationRepository {
     }
 
     @Test
-    public void testLookupApplication() throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException {
+    public void testLookupApplication() throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException, StrangerExceptions.SystemFailureException {
         Application application = this.appRepository.lookupApplication(new StringId("1"));
 
         Assert.assertNotNull(application, "application can not be null");

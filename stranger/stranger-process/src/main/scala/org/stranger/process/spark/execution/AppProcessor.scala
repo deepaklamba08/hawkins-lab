@@ -38,7 +38,7 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
   }
 
   private def process(application: Application, sparkSession: SparkSession): ExecutionResult = {
-    val executionResult = Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
+    Try(this.processSources(application.getDataSources.asScala, sparkSession)) match {
       case Success(_) =>
         Try(this.processTransformations(application.getTransformations.asScala, sparkSession)) match {
           case Success(_) =>
@@ -51,9 +51,6 @@ class AppProcessor private[execution](rc: RuntimeConfiguration) {
         }
       case Failure(exception) => this.toExecutionResult(StrangerConstants.APP_EXE_DS_LOAD_FAILED_MESSAGE, exception)
     }
-    logger.info("execution result - {}", executionResult.getExecutionStatus)
-    logger.info("Exiting : AppProcessor.process()")
-    executionResult
   }
 
   private def processSources(sources: Seq[DataSource], sparkSession: SparkSession): Unit = {

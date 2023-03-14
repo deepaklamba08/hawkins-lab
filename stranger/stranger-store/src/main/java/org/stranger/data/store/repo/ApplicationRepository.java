@@ -5,6 +5,6 @@ import org.stranger.common.model.application.Application;
 import org.stranger.common.model.id.Id;
 
 public interface ApplicationRepository {
-    public Application lookupApplication(Id applicationId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException;
+    public Application lookupApplication(Id applicationId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException, StrangerExceptions.SystemFailureException;
 
 }

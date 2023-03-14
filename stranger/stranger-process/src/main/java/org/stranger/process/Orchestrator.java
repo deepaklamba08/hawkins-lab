@@ -14,10 +14,10 @@ import java.util.Date;
 
 public class Orchestrator {
 
-    private Logger logger;
-    private ApplicationRepository applicationRepository;
-    private ExecutionResultRepository executionResultRepository;
-    private IApplicationRunner applicationRunner;
+    private final Logger logger;
+    private final ApplicationRepository applicationRepository;
+    private final ExecutionResultRepository executionResultRepository;
+    private final IApplicationRunner applicationRunner;
 
     public Orchestrator(ApplicationRepository applicationRepository, ExecutionResultRepository executionResultRepository, IApplicationRunner applicationRunner) {
         this.logger = LoggerFactory.getLogger(this.getClass());

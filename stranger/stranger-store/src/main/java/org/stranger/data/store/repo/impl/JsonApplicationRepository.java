@@ -31,15 +31,23 @@ import java.util.stream.Stream;
 public class JsonApplicationRepository implements ApplicationRepository {
     private Logger logger;
     private final File configFile;
+    private final Optional<Map<String, String>> parameters;
     private Map<Id, Application> applications;
 
     public JsonApplicationRepository(File configFile) {
         this.configFile = configFile;
+        this.parameters = Optional.empty();
+        this.logger = LoggerFactory.getLogger(this.getClass());
+    }
+
+    public JsonApplicationRepository(File configFile, Optional<Map<String, String>> parameters) {
+        this.configFile = configFile;
+        this.parameters = parameters;
         this.logger = LoggerFactory.getLogger(this.getClass());
     }
 
     @Override
-    public Application lookupApplication(Id applicationId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException {
+    public Application lookupApplication(Id applicationId) throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException, StrangerExceptions.SystemFailureException {
         logger.info("Executing : JsonApplicationRepository.lookupApplication(applicationId : {})", applicationId);
         if (applicationId == null) {
             logger.error("applicationId can not be null");
@@ -55,7 +63,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
         return application;
     }
 
-    private void loadApplications() throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException {
+    private void loadApplications() throws StrangerExceptions.ObjectNotFoundException, StrangerExceptions.InvalidConfigurationException, StrangerExceptions.SystemFailureException {
         logger.info("Executing : JsonApplicationRepository.loadApplications()");
         if (this.configFile == null || this.configFile.getAbsolutePath().isEmpty()) {
             logger.error("Config file path can not be null or empty, path - {}", this.configFile);
@@ -64,7 +72,7 @@ public class JsonApplicationRepository implements ApplicationRepository {
         if (!this.configFile.exists()) {
             throw new StrangerExceptions.ObjectNotFoundException("Config file not not found - " + this.configFile.getAbsolutePath());
         }
-        JsonConfiguration appConfig = ConfigurationFactory.load(this.configFile, StrangerConstants.REPO_TYPE_JSON);
+        JsonConfiguration appConfig = ConfigurationFactory.load(this.configFile, StrangerConstants.REPO_TYPE_JSON, this.parameters);
         if (appConfig.isNull() || !appConfig.isArray()) {
             throw new StrangerExceptions.InvalidConfigurationException("configuration is invalid");
         }

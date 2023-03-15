@@ -6,5 +6,9 @@ import org.stranger.process.spark.execution.model.DataBag
 
 trait TransformationFunction {
 
-  def execute(configuration: Configuration, sparkSession: SparkSession): DataBag
+  def init(configuration: Configuration): Unit
+
+  def execute(sparkSession: SparkSession): DataBag
+
+  def close(): Unit
 }

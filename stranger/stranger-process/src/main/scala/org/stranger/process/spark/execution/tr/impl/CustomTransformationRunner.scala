@@ -19,6 +19,7 @@ class CustomTransformationRunner(sparkSession: SparkSession) extends Transformat
       case customTr: CustomTransformation => customTr
       case other => throw new InvalidConfigurationException(s"invalid transformation type - $other")
     }
+    logger.debug("loading transformation - {}", customTransformation.getImplementation)
     val transformationFunction = Try(Class.forName(customTransformation.getImplementation).newInstance()) match {
       case Success(value) => value match {
         case trFx: TransformationFunction => trFx
@@ -27,6 +28,9 @@ class CustomTransformationRunner(sparkSession: SparkSession) extends Transformat
       }
       case Failure(exception) => throw new InvalidConfigurationException(s"failed to load custom transformation - ${customTransformation.getImplementation}", exception)
     }
-    transformationFunction.execute(customTransformation.getConfiguration, this.sparkSession)
+    transformationFunction.init(customTransformation.getConfiguration)
+    val dataBag = transformationFunction.execute(this.sparkSession)
+    transformationFunction.close()
+    dataBag
   }
 }

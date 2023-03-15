@@ -37,7 +37,7 @@
     "transformations": [
       {
         "id": "1",
-        "name": "sample transformation",
+        "name": "sample sql transformation",
         "description": "spark based etl application transformation",
         "createDate": 1678925923592,
         "createdBy": "xyz",
@@ -49,6 +49,24 @@
         "view": {
           "name": "data_table_1",
           "isPersist": false
+        }
+      },
+      {
+        "id": "2",
+        "name": "sample custom transformation",
+        "description": "spark based etl application transformation",
+        "createDate": 1678925923592,
+        "createdBy": "xyz",
+        "isActive": true,
+        "index": 2,
+        "type": "custom",
+        "implementation": "org.stranger.process.spark.execution.tr.impl.custom.DataProfileTransformationFunction",
+        "view": {
+          "name": "data_table_2",
+          "isPersist": false
+        },
+        "configuration": {
+          "sourceView": "global_temp.data_table_1"
         }
       }
     ],
@@ -67,7 +85,7 @@
         "isActive": true,
         "type": "file",
         "queryType": "sql",
-        "value": "select * from global_temp.data_table_1",
+        "value": "select * from global_temp.data_table_2",
         "configuration": {}
       }
     ]
